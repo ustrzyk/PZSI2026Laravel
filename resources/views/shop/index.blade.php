@@ -131,7 +131,7 @@
                                             </h5>
 
                                             <p class="card-text">
-                                                {{ \Illuminate\Support\Str::limit($product->Description, 110) }}
+                                                {{ \Illuminate\Support\Str::limit($product->Description, 80) }}
                                             </p>
 
                                             <p class="mb-1">
@@ -158,6 +158,11 @@
                                         </div>
 
                                         <div class="card-footer">
+                                            <a href="{{ route('shop.show', $product->Id) }}"
+                                               class="btn btn-info w-100 mb-2">
+                                                Szczegóły
+                                            </a>
+
                                             @if($product->Stock > 0)
                                                 <form method="POST" action="{{ route('cart.add', $product->Id) }}">
                                                     @csrf

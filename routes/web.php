@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ShopController::class, 'index'])->name('shop.index');
 Route::get('/category/{id}', [ShopController::class, 'category'])->name('shop.category');
+Route::get('/product/{id}', [ShopController::class, 'show'])->name('shop.show');
 
 Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
 Route::post('/login', [AuthController::class, 'loginPost'])->name('auth.login.post');

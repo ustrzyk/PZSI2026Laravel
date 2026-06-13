@@ -47,4 +47,14 @@ class ShopController extends Controller
             'search' => $request->query('search')
         ]);
     }
+
+    public function show(int $id)
+    {
+        // szczegóły jednego aktywnego produktu
+        $product = $this->productService->getActiveByIdForShop($id);
+
+        return view('shop.show', [
+            'product' => $product
+        ]);
+    }
 }

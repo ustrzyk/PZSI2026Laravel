@@ -102,7 +102,7 @@
                         </h5>
 
                         <p class="card-text">
-                            {{ \Illuminate\Support\Str::limit($product->Description, 120) }}
+                            {{ \Illuminate\Support\Str::limit($product->Description, 80) }}
                         </p>
 
                         <p class="mb-1">
@@ -121,21 +121,14 @@
                                 </span>
                             @endif
                         </p>
-
-                        @if($product->accessories->count() > 0)
-                            <p class="mb-1">
-                                <strong>Akcesoria:</strong>
-                            </p>
-
-                            <ul>
-                                @foreach($product->accessories as $accessory)
-                                    <li>{{ $accessory->Name }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
                     </div>
 
                     <div class="card-footer">
+                        <a href="{{ route('shop.show', $product->Id) }}"
+                           class="btn btn-info w-100 mb-2">
+                            Szczegóły
+                        </a>
+
                         @if($product->Stock > 0)
                             <form method="POST" action="{{ route('cart.add', $product->Id) }}">
                                 @csrf

@@ -79,7 +79,16 @@ class ProductService
 
     public function getById(int $id): Product
     {
+        // ta metoda jest używana w panelu admina
         return Product::with(['category', 'accessories'])->findOrFail($id);
+    }
+
+    public function getActiveByIdForShop(int $id): Product
+    {
+        // ta metoda jest używana na publicznej stronie szczegółów produktu
+        return Product::with(['category', 'accessories'])
+            ->where('IsActive', 1)
+            ->findOrFail($id);
     }
 
     public function addToDb(Request $request): void
