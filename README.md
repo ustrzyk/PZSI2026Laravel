@@ -39,13 +39,16 @@ Git
 
 ## 2. Cel projektu
 
-Celem projektu jest stworzenie prostego sklepu internetowego z drukarkami 3D.
+Celem projektu jest stworzenie sklepu internetowego z drukarkami 3D, filamentami i akcesoriami.
 
 Użytkownik może:
 
 ```txt
-- przeglądać produkty,
+- przeglądać stronę główną sklepu,
+- wybierać kategorię produktów,
+- przeglądać produkty promowane,
 - wyszukiwać produkty,
+- filtrować produkty,
 - dodawać produkty do koszyka,
 - składać zamówienia,
 - rejestrować się,
@@ -75,6 +78,9 @@ Projekt zawiera:
 - relację wiele-do-wielu,
 - operacje CRUD,
 - wyszukiwanie danych,
+- filtrowanie produktów po kategorii,
+- produkty promowane,
+- karuzelę produktów promowanych,
 - walidację formularzy,
 - routing,
 - kontrolery,
@@ -84,7 +90,8 @@ Projekt zawiera:
 - logowanie i rejestrację użytkownika,
 - role użytkowników,
 - zabezpieczenie panelu administracyjnego,
-- koszyk zapisany w sesji.
+- koszyk zapisany w sesji,
+- stopkę z datą i godziną.
 ```
 
 Usuwanie rekordów jest realizowane jako dezaktywacja:
@@ -132,6 +139,14 @@ Aktualnie wykonano:
 28. Dodanie automatycznego przeliczania wartości zamówienia po zmianie pozycji.
 29. Dodanie ról użytkowników: admin i client.
 30. Dodanie zabezpieczenia panelu administracyjnego middleware.
+31. Dodanie stopki z datą, godziną i informacją o projekcie.
+32. Poprawienie strony głównej klienta.
+33. Dodanie kafelków kategorii na stronie głównej.
+34. Dodanie produktów promowanych.
+35. Dodanie karuzeli produktów promowanych.
+36. Dodanie osobnej strony kategorii.
+37. Dodanie wyszukiwania produktów w wybranej kategorii.
+38. Dodanie oznaczania produktu jako promowany w panelu administratora.
 ```
 
 ---
@@ -316,7 +331,48 @@ client
 
 ---
 
-## 9. Plik SQL
+## 9. Tabela Products i produkty promowane
+
+Tabela `Products` przechowuje produkty sklepu.
+
+Najważniejsze pola:
+
+```txt
+Id
+Name
+Description
+Price
+Stock
+CategoryId
+ImageUrl
+IsPromoted
+CreationDateTime
+EditDateTime
+IsActive
+```
+
+Pole `CategoryId` jest kluczem obcym do tabeli:
+
+```txt
+Categories
+```
+
+Pole `IsPromoted` oznacza, czy produkt ma być pokazany na stronie głównej jako produkt promowany.
+
+Znaczenie pola:
+
+```txt
+IsPromoted = 1 - produkt promowany
+IsPromoted = 0 - produkt zwykły
+```
+
+Dzięki temu strona główna nie musi wyświetlać wszystkich produktów, tylko wybrane produkty promowane.
+
+To jest ważne, bo przy dużej liczbie produktów, na przykład 1000, strona główna byłaby nieczytelna.
+
+---
+
+## 10. Plik SQL
 
 Plik SQL tworzy bazę danych:
 
@@ -359,10 +415,23 @@ CREATE TABLE Users (
 );
 ```
 
-Przykład klucza obcego:
+Przykład tabeli produktów z produktem promowanym:
 
 ```sql
-FOREIGN KEY (CategoryId) REFERENCES Categories(Id)
+CREATE TABLE Products (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(150) NOT NULL,
+    Description TEXT NOT NULL,
+    Price DECIMAL(10,2) NOT NULL,
+    Stock INT NOT NULL,
+    CategoryId INT NOT NULL,
+    ImageUrl VARCHAR(255),
+    IsPromoted BIT NOT NULL,
+    CreationDateTime DATETIME NOT NULL,
+    EditDateTime DATETIME NOT NULL,
+    IsActive BIT NOT NULL,
+    FOREIGN KEY (CategoryId) REFERENCES Categories(Id)
+);
 ```
 
 Przykład relacji wiele-do-wielu:
@@ -379,7 +448,7 @@ CREATE TABLE ProductAccessories (
 
 ---
 
-## 10. Dane testowe
+## 11. Dane testowe
 
 W bazie dodane są przykładowe kategorie:
 
@@ -414,11 +483,19 @@ Bambu Lab A1 Mini -> Filament PLA 1kg
 Bambu Lab A1 Mini -> Stół magnetyczny
 ```
 
+W danych startowych przykładowe produkty mają ustawione:
+
+```txt
+IsPromoted = 1
+```
+
+Dzięki temu są widoczne na stronie głównej jako produkty promowane.
+
 Dane logowania nie są wyświetlane w formularzu logowania.
 
 ---
 
-## 11. Modele Laravel
+## 12. Modele Laravel
 
 Modele znajdują się w katalogu:
 
@@ -468,7 +545,7 @@ Dzięki temu Laravel używa kolumn `CreationDateTime` i `EditDateTime` zamiast d
 
 ---
 
-## 12. Relacje w modelach
+## 13. Relacje w modelach
 
 W modelach dodano relacje między tabelami.
 
@@ -593,7 +670,7 @@ return $this->belongsTo(Product::class, 'ProductId', 'Id');
 
 ---
 
-## 13. Serwisy Laravel
+## 14. Serwisy Laravel
 
 Serwisy znajdują się w katalogu:
 
@@ -620,6 +697,9 @@ W serwisach znajdują się metody do:
 ```txt
 - pobierania danych,
 - wyszukiwania danych,
+- filtrowania danych,
+- pobierania produktów promowanych,
+- pobierania produktów z konkretnej kategorii,
 - dodawania rekordów,
 - edycji rekordów,
 - dezaktywacji rekordów,
@@ -635,7 +715,69 @@ Dzięki temu kontrolery są krótsze, bo większość logiki jest przeniesiona d
 
 ---
 
-## 14. AuthService
+## 15. ProductService
+
+Serwis `ProductService` odpowiada za logikę produktów.
+
+Najważniejsze metody:
+
+```txt
+getAll()
+getPromotedForShop()
+getForCategory()
+getForShop()
+getById()
+addToDb()
+update()
+delete()
+```
+
+Metoda `getAll()` pobiera produkty do panelu administratora.
+
+Metoda `getPromotedForShop()` pobiera produkty promowane na stronę główną sklepu.
+
+Metoda `getForCategory()` pobiera produkty tylko z jednej wybranej kategorii.
+
+Metoda `getForShop()` została jako awaryjna metoda pobierania produktów z paginacją.
+
+W produktach administrator może ustawić:
+
+```txt
+Produkt promowany na stronie głównej
+```
+
+W kodzie jest to zapisywane w polu:
+
+```txt
+IsPromoted
+```
+
+---
+
+## 16. CategoryService
+
+Serwis `CategoryService` odpowiada za logikę kategorii.
+
+Najważniejsze metody:
+
+```txt
+getAll()
+getActive()
+getById()
+addToDb()
+update()
+delete()
+```
+
+Metoda `getAll()` pobiera kategorie do panelu administratora.
+
+Metoda `getActive()` pobiera aktywne kategorie na stronę sklepu.
+
+Aktywne kategorie są używane jako kafelki na stronie głównej oraz na stronie wybranej kategorii.
+
+---
+
+## 17. AuthService
 
 Serwis `AuthService` odpowiada za:
 
@@ -681,7 +823,7 @@ session()->forget('user_role');
 
 ---
 
-## 15. UserService
+## 18. UserService
 
 Serwis `UserService` odpowiada za zarządzanie użytkownikami.
 
@@ -712,7 +854,7 @@ session(['user_role' => $model->Role]);
 
 ---
 
-## 16. OrderItemService i przeliczanie wartości zamówienia
+## 19. OrderItemService i przeliczanie wartości zamówienia
 
 W projekcie dodano poprawkę, która automatycznie przelicza wartość zamówienia po zmianie pozycji zamówienia.
 
@@ -751,7 +893,7 @@ $order->save();
 
 ---
 
-## 17. Walidacja formularzy
+## 20. Walidacja formularzy
 
 Walidacja formularzy jest wykonywana w serwisach przez:
 
@@ -769,6 +911,7 @@ $request->validate([
     'Stock' => ['required', 'integer', 'min:0'],
     'CategoryId' => ['required', 'integer', 'exists:Categories,Id'],
     'ImageUrl' => ['nullable', 'string', 'max:255'],
+    'IsPromoted' => ['nullable'],
     'Accessories' => ['nullable', 'array'],
 ]);
 ```
@@ -781,6 +924,7 @@ W tej walidacji sprawdzane jest między innymi:
 - czy cena jest większa od 0,
 - czy stan magazynowy nie jest ujemny,
 - czy wybrana kategoria istnieje w tabeli Categories,
+- czy adres obrazka nie jest za długi,
 - czy lista akcesoriów jest tablicą.
 ```
 
@@ -798,7 +942,7 @@ Przykład walidacji roli użytkownika:
 
 ---
 
-## 18. Wyszukiwanie
+## 21. Wyszukiwanie i filtrowanie
 
 Wyszukiwanie jest realizowane przez query params.
 
@@ -822,7 +966,11 @@ if ($request->query('search')) {
 }
 ```
 
-Wyszukiwanie działa między innymi dla:
+Na stronie głównej sklepu można wyszukiwać produkty promowane.
+
+Na stronie wybranej kategorii można wyszukiwać produkty tylko w tej kategorii.
+
+W panelu administratora wyszukiwanie działa między innymi dla:
 
 ```txt
 - produktów,
@@ -835,7 +983,7 @@ Wyszukiwanie działa między innymi dla:
 
 ---
 
-## 19. Dezaktywacja rekordów
+## 22. Dezaktywacja rekordów
 
 Rekordy nie są usuwane fizycznie z bazy.
 
@@ -862,7 +1010,7 @@ Tak działa dezaktywacja:
 
 ---
 
-## 20. Middleware i zabezpieczenie dostępu
+## 23. Middleware i zabezpieczenie dostępu
 
 Middleware znajdują się w katalogu:
 
@@ -897,7 +1045,7 @@ Alias dla middleware administratora:
 
 ---
 
-## 21. CheckUserLogged
+## 24. CheckUserLogged
 
 Middleware `CheckUserLogged` sprawdza, czy użytkownik jest zalogowany.
 
@@ -913,7 +1061,7 @@ Dzięki temu koszyk można przeglądać publicznie, ale zamówienie może złoż
 
 ---
 
-## 22. CheckAdmin
+## 25. CheckAdmin
 
 Middleware `CheckAdmin` sprawdza dwie rzeczy:
 
@@ -934,12 +1082,13 @@ admin
 
 ---
 
-## 23. Dostęp publiczny i administracyjny
+## 26. Dostęp publiczny i administracyjny
 
 Publicznie dostępne strony:
 
 ```txt
 /
+category/{id}
 login
 register
 cart
@@ -966,7 +1115,7 @@ Dostępne tylko dla administratora:
 
 ---
 
-## 24. Trasy aplikacji
+## 27. Trasy aplikacji
 
 Trasy aplikacji znajdują się w pliku:
 
@@ -978,6 +1127,12 @@ Strona główna sklepu:
 
 ```php
 Route::get('/', [ShopController::class, 'index'])->name('shop.index');
+```
+
+Strona wybranej kategorii:
+
+```php
+Route::get('/category/{id}', [ShopController::class, 'category'])->name('shop.category');
 ```
 
 Logowanie i rejestracja:
@@ -1016,7 +1171,7 @@ Route::middleware('admin')->group(function () {
 
 ---
 
-## 25. Kontrolery Laravel
+## 28. Kontrolery Laravel
 
 Kontrolery znajdują się w katalogu:
 
@@ -1054,7 +1209,45 @@ Przykład:
 
 ---
 
-## 26. Widoki Blade
+## 29. ShopController
+
+Kontroler `ShopController` odpowiada za widoki klienta.
+
+Metoda `index()` obsługuje stronę główną sklepu:
+
+```txt
+/
+```
+
+Na stronie głównej pokazuje:
+
+```txt
+- kafelki kategorii,
+- wyszukiwarkę produktów promowanych,
+- produkty promowane,
+- karuzelę produktów promowanych.
+```
+
+Metoda `category()` obsługuje stronę wybranej kategorii:
+
+```txt
+/category/{id}
+```
+
+Na stronie kategorii pokazuje:
+
+```txt
+- nazwę kategorii,
+- opis kategorii,
+- kafelki kategorii,
+- wyszukiwarkę w kategorii,
+- produkty tylko z danej kategorii,
+- paginację produktów.
+```
+
+---
+
+## 30. Widoki Blade
 
 Widoki Blade znajdują się w katalogu:
 
@@ -1076,7 +1269,8 @@ Layout zawiera:
 - menu nawigacyjne,
 - komunikaty sukcesu,
 - komunikaty błędów,
-- miejsce na treść strony.
+- miejsce na treść strony,
+- stopkę.
 ```
 
 Miejsce na treść strony jest oznaczone przez:
@@ -1099,7 +1293,29 @@ admin
 
 ---
 
-## 27. Widok strony głównej sklepu
+## 31. Stopka
+
+Stopka znajduje się w głównym layoucie:
+
+```txt
+resources/views/main.blade.php
+```
+
+W stopce jest informacja:
+
+```txt
+TSaran - projekt Laravel PZSI
+```
+
+W stopce wyświetlana jest też aktualna data i godzina:
+
+```php
+{{ now()->format('d.m.Y H:i') }}
+```
+
+---
+
+## 32. Widok strony głównej sklepu
 
 Widok strony głównej sklepu znajduje się w pliku:
 
@@ -1107,33 +1323,97 @@ Widok strony głównej sklepu znajduje się w pliku:
 resources/views/shop/index.blade.php
 ```
 
-Ten widok pokazuje produkty dostępne w sklepie.
+Strona główna nie pokazuje wszystkich produktów.
 
-Na stronie głównej są wyświetlane:
-
-```txt
-- nazwa produktu,
-- opis produktu,
-- kategoria,
-- cena,
-- stan magazynowy,
-- powiązane akcesoria,
-- przycisk dodania produktu do koszyka.
-```
-
-Na stronie głównej jest wyszukiwarka produktów.
-
-Przykład wyszukiwania:
+Strona główna pokazuje:
 
 ```txt
-/?search=bambu
+- nagłówek sklepu,
+- opis sklepu,
+- przycisk przejścia do koszyka,
+- szybki wybór kategorii,
+- wyszukiwarkę produktów promowanych,
+- produkty promowane,
+- karuzelę produktów promowanych.
 ```
 
-Produkt dodawany jest do koszyka przez formularz POST.
+Opis sklepu:
+
+```txt
+Sklep internetowy z drukarkami 3D, filamentami i akcesoriami.
+```
+
+Szybki wybór kategorii jest pokazany jako kafelki z ikonami.
+
+Przykładowe ikony:
+
+```txt
+🖨️
+🧵
+🔧
+⚙️
+📦
+🛠️
+```
+
+Produkty promowane są pobierane na podstawie pola:
+
+```txt
+IsPromoted
+```
+
+Na stronie głównej klient widzi tylko produkty promowane, żeby strona była czytelna nawet przy dużej liczbie produktów.
 
 ---
 
-## 28. Widoki logowania i rejestracji
+## 33. Karuzela produktów promowanych
+
+Produkty promowane na stronie głównej są pokazane w karuzeli Bootstrap.
+
+Karuzela pokazuje produkty w grupach po 3.
+
+Jeżeli jest więcej produktów promowanych, użytkownik może przesuwać karuzelę w lewo i w prawo.
+
+Dzięki temu strona główna pozostaje czytelna.
+
+---
+
+## 34. Widok kategorii
+
+Widok kategorii znajduje się w pliku:
+
+```txt
+resources/views/shop/category.blade.php
+```
+
+Adres strony kategorii:
+
+```txt
+/category/{id}
+```
+
+Widok kategorii pokazuje:
+
+```txt
+- nazwę aktualnej kategorii,
+- opis aktualnej kategorii,
+- listę kafelków kategorii,
+- wyszukiwarkę produktów w kategorii,
+- produkty tylko z danej kategorii,
+- paginację.
+```
+
+Na stronie kategorii użytkownik może szukać produktów tylko w wybranej kategorii.
+
+Przykład:
+
+```txt
+/category/1?search=ender
+```
+
+---
+
+## 35. Widoki logowania i rejestracji
 
 Widoki logowania i rejestracji znajdują się w folderze:
 
@@ -1194,7 +1474,7 @@ client
 
 ---
 
-## 29. Widok koszyka
+## 36. Widok koszyka
 
 Widok koszyka znajduje się w pliku:
 
@@ -1224,7 +1504,7 @@ Address
 
 ---
 
-## 30. Widoki produktów
+## 37. Widoki produktów
 
 Widoki produktów znajdują się w katalogu:
 
@@ -1249,7 +1529,8 @@ Funkcje:
 - edycja produktów,
 - dezaktywacja produktów,
 - przypisywanie kategorii,
-- przypisywanie akcesoriów.
+- przypisywanie akcesoriów,
+- oznaczanie produktu jako promowany.
 ```
 
 Adresy:
@@ -1260,9 +1541,17 @@ Adresy:
 /products/edit/{id}
 ```
 
+W panelu produktów administrator widzi, czy produkt jest promowany.
+
+W formularzu dodawania i edycji produktu jest checkbox:
+
+```txt
+Produkt promowany na stronie głównej
+```
+
 ---
 
-## 31. Widoki kategorii
+## 38. Widoki kategorii w panelu admina
 
 Widoki kategorii znajdują się w katalogu:
 
@@ -1298,7 +1587,7 @@ Adresy:
 
 ---
 
-## 32. Widoki akcesoriów
+## 39. Widoki akcesoriów
 
 Widoki akcesoriów znajdują się w katalogu:
 
@@ -1334,7 +1623,7 @@ Adresy:
 
 ---
 
-## 33. Widoki użytkowników
+## 40. Widoki użytkowników
 
 Widoki użytkowników znajdują się w katalogu:
 
@@ -1392,7 +1681,7 @@ Adresy:
 
 ---
 
-## 34. Widoki zamówień
+## 41. Widoki zamówień
 
 Widoki zamówień znajdują się w katalogu:
 
@@ -1450,7 +1739,7 @@ Adresy:
 
 ---
 
-## 35. Widoki pozycji zamówień
+## 42. Widoki pozycji zamówień
 
 Widoki pozycji zamówień znajdują się w katalogu:
 
@@ -1507,7 +1796,7 @@ Adresy:
 
 ---
 
-## 36. Query params, URL params i POST
+## 43. Query params, URL params i POST
 
 Przykład query params:
 
@@ -1519,6 +1808,12 @@ W kodzie pobierane przez:
 
 ```php
 $request->query('search')
+```
+
+Przykład query params na stronie kategorii:
+
+```txt
+/category/1?search=ender
 ```
 
 Przykład URL params:
@@ -1562,7 +1857,7 @@ DELETE
 
 ---
 
-## 37. Jak wgrać bazę danych
+## 44. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1591,7 +1886,7 @@ pzsi-druk-3d
 
 ---
 
-## 38. Jak zaktualizować istniejącą bazę o role
+## 45. Jak zaktualizować istniejącą bazę o role
 
 Jeżeli baza już istnieje i nie chcesz jej usuwać, należy wykonać w phpMyAdmin:
 
@@ -1608,7 +1903,32 @@ Jeżeli kolumna `Role` już istnieje, tego polecenia `ALTER TABLE` nie trzeba wy
 
 ---
 
-## 39. Jak naprawić istniejące wartości zamówień
+## 46. Jak zaktualizować istniejącą bazę o produkty promowane
+
+Jeżeli baza już istnieje i nie chcesz jej usuwać, należy wykonać w phpMyAdmin:
+
+```sql
+ALTER TABLE Products
+ADD IsPromoted BIT NOT NULL DEFAULT 0 AFTER ImageUrl;
+
+UPDATE Products
+SET IsPromoted = 1
+WHERE Id IN (1, 2, 3);
+```
+
+Jeżeli kolumna `IsPromoted` już istnieje, tego polecenia `ALTER TABLE` nie trzeba wykonywać drugi raz.
+
+Wtedy można wykonać tylko:
+
+```sql
+UPDATE Products
+SET IsPromoted = 1
+WHERE Id IN (1, 2, 3);
+```
+
+---
+
+## 47. Jak naprawić istniejące wartości zamówień
 
 Jeżeli wcześniej były edytowane pozycje zamówienia i suma zamówienia się nie zgadzała, można wykonać SQL:
 
@@ -1628,7 +1948,7 @@ To przeliczy wartość zamówień na podstawie aktywnych pozycji zamówienia.
 
 ---
 
-## 40. Jak sprawdzić trasy
+## 48. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1640,6 +1960,7 @@ Powinny pojawić się między innymi trasy:
 
 ```txt
 /
+category/{id}
 login
 register
 cart
@@ -1653,7 +1974,7 @@ order-items
 
 ---
 
-## 41. Jak uruchomić projekt
+## 49. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1699,7 +2020,57 @@ http://127.0.0.1:8000
 
 ---
 
-## 42. Test działania ról
+## 50. Test strony klienta
+
+Do sprawdzenia:
+
+```txt
+/
+```
+
+Na stronie głównej powinny być widoczne:
+
+```txt
+- kafelki kategorii,
+- produkty promowane,
+- karuzela produktów promowanych,
+- wyszukiwarka produktów promowanych,
+- przycisk koszyka,
+- stopka.
+```
+
+Do sprawdzenia strona kategorii:
+
+```txt
+/category/1
+```
+
+Na stronie kategorii powinny być widoczne:
+
+```txt
+- nazwa kategorii,
+- opis kategorii,
+- kafelki kategorii,
+- produkty tylko z wybranej kategorii,
+- wyszukiwarka produktów w wybranej kategorii,
+- paginacja.
+```
+
+Test wyszukiwania na stronie głównej:
+
+```txt
+/?search=bambu
+```
+
+Test wyszukiwania w kategorii:
+
+```txt
+/category/1?search=ender
+```
+
+---
+
+## 51. Test działania ról
 
 Test bez logowania:
 
@@ -1744,7 +2115,7 @@ administrator ma dostęp do panelu administracyjnego
 
 ---
 
-## 43. Dziennik pracy
+## 52. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1937,3 +2308,43 @@ CheckAdmin
 ```
 
 Panel administracyjny zabezpieczono tak, aby dostęp miał tylko administrator.
+
+### Krok 19 - poprawa widoku klienta
+
+Dodano stopkę z informacją:
+
+```txt
+TSaran - projekt Laravel PZSI
+```
+
+Dodano aktualną datę i godzinę w stopce.
+
+Poprawiono opis strony głównej sklepu:
+
+```txt
+Sklep internetowy z drukarkami 3D, filamentami i akcesoriami.
+```
+
+### Krok 20 - kategorie i produkty promowane
+
+Dodano kafelki kategorii na stronie głównej.
+
+Dodano pole:
+
+```txt
+IsPromoted
+```
+
+Dodano produkty promowane na stronie głównej.
+
+Dodano karuzelę produktów promowanych.
+
+Dodano osobną stronę kategorii:
+
+```txt
+/category/{id}
+```
+
+Dodano wyszukiwanie produktów w wybranej kategorii.
+
+Dodano możliwość oznaczania produktu jako promowany w panelu administratora.
