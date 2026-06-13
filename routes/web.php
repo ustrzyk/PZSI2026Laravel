@@ -4,6 +4,7 @@ use App\Http\Controllers\AccessoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\MyOrderController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
 use App\Http\Controllers\ProductController;
@@ -26,6 +27,9 @@ Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.
 
 Route::middleware('user.logged')->group(function () {
     Route::post('/cart/order', [CartController::class, 'order'])->name('cart.order');
+
+    Route::get('/my-orders', [MyOrderController::class, 'index'])->name('my-orders.index');
+    Route::get('/my-orders/{id}', [MyOrderController::class, 'show'])->name('my-orders.show');
 });
 
 Route::middleware('admin')->group(function () {

@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class OrderService
 {
@@ -25,6 +26,39 @@ class OrderService
     public function getById(int $id): Order
     {
         return Order::with(['user', 'items.product'])->findOrFail($id);
+    }
+
+    public function getForCurrentUser(Request $request): LengthAwarePaginator
+    {
+        // pobieram tylko zamówienia aktualnie zalogowanego użytkownika
+        $query = Order::with(['items.product'])
+            ->where('IsActive', 1)
+            ->where('UserId', session('user_id'));
+
+        if ($request->query('search')) {
+            $search = $request->query('search');
+
+            $query->where(function ($q) use ($search) {
+                $q->where('CustomerName', 'like', '%' . $search . '%')
+                    ->orWhere('CustomerEmail', 'like', '%' . $search . '%')
+                    ->orWhere('Address', 'like', '%' . $search . '%')
+                    ->orWhere('Status', 'like', '%' . $search . '%')
+                    ->orWhere('Id', $search);
+            });
+        }
+
+        return $query->orderBy('CreationDateTime', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    public function getForCurrentUserById(int $id): Order
+    {
+        // zabezpieczenie: klient nie może podejrzeć cudzego zamówienia
+        return Order::with(['items.product'])
+            ->where('IsActive', 1)
+            ->where('UserId', session('user_id'))
+            ->findOrFail($id);
     }
 
     public function createFromCart(Request $request): void

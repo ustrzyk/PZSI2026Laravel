@@ -28,6 +28,12 @@
                     <a class="nav-link" href="{{ route('cart.index') }}">Koszyk</a>
                 </li>
 
+                @if(session('user_id'))
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('my-orders.index') }}">Moje zamówienia</a>
+                    </li>
+                @endif
+
                 @if(session('user_role') === 'admin')
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('products.index') }}">Produkty</a>
