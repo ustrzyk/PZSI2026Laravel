@@ -115,6 +115,7 @@ Aktualnie wykonano:
 23. Utworzenie widoków CRUD dla akcesoriów.
 24. Utworzenie widoków CRUD dla użytkowników.
 25. Utworzenie widoków dla zamówień.
+26. Utworzenie widoków CRUD dla pozycji zamówień.
 ```
 
 ---
@@ -837,13 +838,15 @@ Route::put('/products/edit/{id}', [ProductController::class, 'update'])->name('p
 Route::delete('/products/delete/{id}', [ProductController::class, 'delete'])->name('products.delete');
 ```
 
-Przykład tras koszyka:
+Przykład tras pozycji zamówień:
 
 ```php
-Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
-Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
-Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
-Route::post('/cart/order', [CartController::class, 'order'])->name('cart.order');
+Route::get('/order-items', [OrderItemController::class, 'index'])->name('order-items.index');
+Route::get('/order-items/create', [OrderItemController::class, 'create'])->name('order-items.create');
+Route::post('/order-items/create', [OrderItemController::class, 'store'])->name('order-items.store');
+Route::get('/order-items/edit/{id}', [OrderItemController::class, 'edit'])->name('order-items.edit');
+Route::put('/order-items/edit/{id}', [OrderItemController::class, 'update'])->name('order-items.update');
+Route::delete('/order-items/delete/{id}', [OrderItemController::class, 'delete'])->name('order-items.delete');
 ```
 
 W trasach używam:
@@ -1166,14 +1169,7 @@ Dezaktywacja produktu:
 /products/delete/{id}
 ```
 
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
-
-```blade
-<form method="POST" action="{{ route('products.delete', $product->Id) }}">
-    @csrf
-    @method('DELETE')
-</form>
-```
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
 
 Dodawanie i edycja produktów używa formularzy POST oraz PUT.
 
@@ -1427,13 +1423,7 @@ index.blade.php
 edit.blade.php
 ```
 
-Widok listy zamówień:
-
-```txt
-resources/views/orders/index.blade.php
-```
-
-Ten widok pokazuje zamówienia razem z danymi klienta i pozycjami zamówienia.
+Widok listy zamówień pokazuje zamówienia razem z danymi klienta i pozycjami zamówienia.
 
 Na liście zamówień są wyświetlane:
 
@@ -1449,13 +1439,7 @@ Na liście zamówień są wyświetlane:
 - przyciski akcji.
 ```
 
-Widok edycji zamówienia:
-
-```txt
-resources/views/orders/edit.blade.php
-```
-
-Ten widok pozwala zmienić status zamówienia.
+Widok edycji zamówienia pozwala zmienić status zamówienia.
 
 Dostępne statusy:
 
@@ -1490,14 +1474,7 @@ Dezaktywacja zamówienia:
 
 Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
 
-Edycja statusu zamówienia używa formularza PUT:
-
-```blade
-<form method="POST" action="{{ route('orders.update', $order->Id) }}">
-    @csrf
-    @method('PUT')
-</form>
-```
+Edycja statusu zamówienia używa formularza PUT.
 
 Wyszukiwanie zamówień działa przez query params:
 
@@ -1509,7 +1486,114 @@ Wyszukiwanie jest wykonywane po nazwie klienta.
 
 ---
 
-## 37. Dziennik pracy
+## 37. Widoki pozycji zamówień
+
+Widoki pozycji zamówień znajdują się w katalogu:
+
+```txt
+resources/views/orderItems
+```
+
+Utworzone pliki:
+
+```txt
+index.blade.php
+create.blade.php
+edit.blade.php
+```
+
+Widok listy pozycji zamówień:
+
+```txt
+resources/views/orderItems/index.blade.php
+```
+
+Ten widok pokazuje pozycje zamówień w tabeli.
+
+Na liście pozycji zamówień są wyświetlane:
+
+```txt
+- ID pozycji,
+- numer zamówienia,
+- klient,
+- produkt,
+- ilość,
+- cena,
+- suma,
+- przyciski akcji.
+```
+
+Widok dodawania pozycji zamówienia:
+
+```txt
+resources/views/orderItems/create.blade.php
+```
+
+Ten widok zawiera formularz dodania pozycji do zamówienia.
+
+W formularzu dodawania pozycji zamówienia są pola:
+
+```txt
+OrderId
+ProductId
+Quantity
+```
+
+Widok edycji pozycji zamówienia:
+
+```txt
+resources/views/orderItems/edit.blade.php
+```
+
+Ten widok pozwala zmienić zamówienie, produkt oraz ilość.
+
+---
+
+## 38. CRUD pozycji zamówień
+
+Dla pozycji zamówień przygotowano widoki potrzebne do operacji CRUD.
+
+Wyświetlanie pozycji zamówień:
+
+```txt
+/order-items
+```
+
+Dodawanie pozycji zamówienia:
+
+```txt
+/order-items/create
+```
+
+Edycja pozycji zamówienia:
+
+```txt
+/order-items/edit/{id}
+```
+
+Dezaktywacja pozycji zamówienia:
+
+```txt
+/order-items/delete/{id}
+```
+
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
+
+Dodawanie pozycji zamówienia używa formularza POST.
+
+Edycja pozycji zamówienia używa formularza PUT.
+
+Wyszukiwanie pozycji zamówień działa przez query params:
+
+```txt
+/order-items?search=ender
+```
+
+Wyszukiwanie jest wykonywane po nazwie produktu.
+
+---
+
+## 39. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1746,11 +1830,27 @@ Widok listy zamówień pokazuje dane zamówienia, dane klienta i pozycje zamówi
 
 Widok edycji zamówienia pozwala zmienić status zamówienia.
 
-Na tym etapie działa obsługa wyświetlania zamówień, edycji statusu i dezaktywacji zamówienia.
+### Krok 16 - widoki pozycji zamówień
+
+Dodałem widoki CRUD dla pozycji zamówień:
+
+```txt
+resources/views/orderItems/index.blade.php
+resources/views/orderItems/create.blade.php
+resources/views/orderItems/edit.blade.php
+```
+
+Widok listy pozycji zamówień pokazuje numer zamówienia, klienta, produkt, ilość, cenę i sumę.
+
+Widok dodawania pozycji zamówienia pozwala wybrać zamówienie, produkt i ilość.
+
+Widok edycji pozycji zamówienia pozwala zmienić zamówienie, produkt i ilość.
+
+Na tym etapie przygotowane są już widoki dla wszystkich głównych tabel projektu.
 
 ---
 
-## 38. Jak wgrać bazę danych
+## 40. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1779,7 +1879,7 @@ pzsi-druk-3d
 
 ---
 
-## 39. Jak sprawdzić trasy
+## 41. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1804,7 +1904,7 @@ order-items
 
 ---
 
-## 40. Jak uruchomić projekt
+## 42. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1836,26 +1936,31 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w pozycje zamówień, ponieważ te widoki będą dodane w kolejnym kroku.
+Na tym etapie aplikacja ma już przygotowane główne modele, serwisy, kontrolery, trasy i widoki CRUD.
 
 ---
 
-## 41. Następny krok
+## 43. Następny krok
 
-Następnie zostaną przygotowane widoki dla pozycji zamówień.
+Następnie trzeba wykonać test całej aplikacji i poprawić ewentualne błędy.
 
-Widoki będą znajdować się w katalogu:
-
-```txt
-resources/views/orderItems
-```
-
-Planowane pliki:
+Do sprawdzenia będą:
 
 ```txt
-index.blade.php
-create.blade.php
-edit.blade.php
+- strona główna sklepu,
+- logowanie,
+- rejestracja,
+- koszyk,
+- składanie zamówienia,
+- lista zamówień,
+- CRUD produktów,
+- CRUD kategorii,
+- CRUD akcesoriów,
+- CRUD użytkowników,
+- CRUD pozycji zamówień,
+- wyszukiwanie na listach,
+- walidacja formularzy,
+- dezaktywacja rekordów.
 ```
 
-Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować pozycje zamówień.
+Po testach można dodać ostatnie poprawki i przygotować opis projektu do obrony.
