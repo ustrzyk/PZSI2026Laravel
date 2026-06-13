@@ -19,6 +19,7 @@ CREATE TABLE Users (
     Name VARCHAR(100) NOT NULL,
     Email VARCHAR(150) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL,
+    Role VARCHAR(20) NOT NULL,
     CreationDateTime DATETIME NOT NULL,
     EditDateTime DATETIME NOT NULL,
     IsActive BIT NOT NULL
@@ -94,11 +95,9 @@ CREATE TABLE OrderItems (
 );
 
 -- dane startowe, żebym miał co klikac w aplikacji
--- login: tsaran
--- hasło: dalej
-INSERT INTO Users (Name, Email, Password, CreationDateTime, EditDateTime, IsActive)
+INSERT INTO Users (Name, Email, Password, Role, CreationDateTime, EditDateTime, IsActive)
 VALUES
-('tsaran', 'tsaran', '$2y$12$FqQTxohofHG25bOU0c0/Z.HZlBXDJYnNgCaANhzytXPVk3fsRXSXu', NOW(), NOW(), 1);
+('tsaran', 'tsaran', '$2y$12$FqQTxohofHG25bOU0c0/Z.HZlBXDJYnNgCaANhzytXPVk3fsRXSXu', 'admin', NOW(), NOW(), 1);
 
 INSERT INTO Categories (Name, Description, CreationDateTime, EditDateTime, IsActive)
 VALUES

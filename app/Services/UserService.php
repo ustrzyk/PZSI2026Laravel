@@ -31,12 +31,14 @@ class UserService
             'Name' => ['required', 'string', 'max:100'],
             'Email' => ['required', 'string', 'max:150', 'unique:Users,Email'],
             'Password' => ['required', 'string', 'min:5'],
+            'Role' => ['required', 'string', 'in:admin,client'],
         ]);
 
         $model = new User();
         $model->Name = $request->input('Name');
         $model->Email = $request->input('Email');
         $model->Password = Hash::make($request->input('Password'));
+        $model->Role = $request->input('Role');
         $model->CreationDateTime = now();
         $model->EditDateTime = now();
         $model->IsActive = 1;
@@ -49,11 +51,13 @@ class UserService
             'Name' => ['required', 'string', 'max:100'],
             'Email' => ['required', 'string', 'max:150', 'unique:Users,Email,' . $id . ',Id'],
             'Password' => ['nullable', 'string', 'min:5'],
+            'Role' => ['required', 'string', 'in:admin,client'],
         ]);
 
         $model = User::findOrFail($id);
         $model->Name = $request->input('Name');
         $model->Email = $request->input('Email');
+        $model->Role = $request->input('Role');
 
         if ($request->input('Password')) {
             $model->Password = Hash::make($request->input('Password'));
@@ -61,6 +65,12 @@ class UserService
 
         $model->EditDateTime = now();
         $model->save();
+
+        // jeśli admin edytuje samego siebie, aktualizuje role też w sesji
+        if (session('user_id') == $model->Id) {
+            session(['user_name' => $model->Name]);
+            session(['user_role' => $model->Role]);
+        }
     }
 
     public function delete(int $id): void

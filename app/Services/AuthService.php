@@ -20,6 +20,7 @@ class AuthService
         $model->Name = $request->input('Name');
         $model->Email = $request->input('Email');
         $model->Password = Hash::make($request->input('Password'));
+        $model->Role = 'client';
         $model->CreationDateTime = now();
         $model->EditDateTime = now();
         $model->IsActive = 1;
@@ -40,6 +41,7 @@ class AuthService
         if ($user && Hash::check($request->input('Password'), $user->Password)) {
             session(['user_id' => $user->Id]);
             session(['user_name' => $user->Name]);
+            session(['user_role' => $user->Role]);
 
             return true;
         }
@@ -51,5 +53,6 @@ class AuthService
     {
         session()->forget('user_id');
         session()->forget('user_name');
+        session()->forget('user_role');
     }
 }

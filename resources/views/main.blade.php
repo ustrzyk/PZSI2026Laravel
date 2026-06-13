@@ -25,38 +25,47 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('products.index') }}">Produkty</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('categories.index') }}">Kategorie</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('accessories.index') }}">Akcesoria</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('orders.index') }}">Zamówienia</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('users.index') }}">Użytkownicy</a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ route('order-items.index') }}">Pozycje zamówień</a>
-                </li>
-            </ul>
-
-            <ul class="navbar-nav">
-                <li class="nav-item">
                     <a class="nav-link" href="{{ route('cart.index') }}">Koszyk</a>
                 </li>
 
+                @if(session('user_role') === 'admin')
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('products.index') }}">Produkty</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('categories.index') }}">Kategorie</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('accessories.index') }}">Akcesoria</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('orders.index') }}">Zamówienia</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('users.index') }}">Użytkownicy</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('order-items.index') }}">Pozycje zamówień</a>
+                    </li>
+                @endif
+            </ul>
+
+            <ul class="navbar-nav">
                 @if(session('user_id'))
                     <li class="nav-item">
-                        <span class="nav-link">Zalogowany: {{ session('user_name') }}</span>
+                        <span class="nav-link">
+                            Zalogowany: {{ session('user_name') }}
+                            @if(session('user_role') === 'admin')
+                                (admin)
+                            @else
+                                (klient)
+                            @endif
+                        </span>
                     </li>
 
                     <li class="nav-item">

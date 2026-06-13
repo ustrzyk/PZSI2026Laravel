@@ -37,6 +37,20 @@
                            class="form-control">
                 </div>
 
+                <div class="mb-3">
+                    <label class="form-label">Rola</label>
+
+                    <select name="Role" class="form-control">
+                        <option value="client" @if(old('Role') == 'client') selected @endif>
+                            Klient
+                        </option>
+
+                        <option value="admin" @if(old('Role') == 'admin') selected @endif>
+                            Admin
+                        </option>
+                    </select>
+                </div>
+
                 <button type="submit" class="btn btn-success">
                     Zapisz użytkownika
                 </button>

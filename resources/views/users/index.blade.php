@@ -38,6 +38,7 @@
                 <th>ID</th>
                 <th>Nazwa</th>
                 <th>Login</th>
+                <th>Rola</th>
                 <th>Akcje</th>
             </tr>
             </thead>
@@ -48,6 +49,13 @@
                     <td>{{ $user->Id }}</td>
                     <td>{{ $user->Name }}</td>
                     <td>{{ $user->Email }}</td>
+                    <td>
+                        @if($user->Role == 'admin')
+                            <span class="badge bg-danger">Admin</span>
+                        @else
+                            <span class="badge bg-secondary">Klient</span>
+                        @endif
+                    </td>
                     <td>
                         <a href="{{ route('users.edit', $user->Id) }}"
                            class="btn btn-warning btn-sm">
