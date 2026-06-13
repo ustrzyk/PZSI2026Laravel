@@ -10,9 +10,16 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
+@php
+    // licznik produktów w koszyku
+    $cartCount = array_sum(session('cart', []));
+@endphp
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('shop.index') }}">Sklep 3D</a>
+        <a class="navbar-brand" href="{{ route('shop.index') }}">
+            🖨️ Sklep 3D
+        </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu">
             <span class="navbar-toggler-icon"></span>
@@ -21,55 +28,110 @@
         <div class="collapse navbar-collapse" id="menu">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('shop.index') }}">Start</a>
+                    <a class="nav-link {{ request()->routeIs('shop.index') ? 'active fw-bold' : '' }}"
+                       href="{{ route('shop.index') }}">
+                        🏠 Start
+                    </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('cart.index') }}">Koszyk</a>
+                    <a class="nav-link {{ request()->routeIs('cart.index') ? 'active fw-bold' : '' }}"
+                       href="{{ route('cart.index') }}">
+                        🛒 Koszyk
+
+                        @if($cartCount > 0)
+                            <span class="badge rounded-pill bg-warning text-dark ms-1">
+                                {{ $cartCount }}
+                            </span>
+                        @endif
+                    </a>
                 </li>
 
                 @if(session('user_id'))
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('my-orders.index') }}">Moje zamówienia</a>
+                        <a class="nav-link {{ request()->routeIs('my-orders.*') ? 'active fw-bold' : '' }}"
+                           href="{{ route('my-orders.index') }}">
+                            📦 Moje zamówienia
+                        </a>
                     </li>
                 @endif
 
                 @if(session('user_role') === 'admin')
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('products.index') }}">Produkty</a>
-                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle
+                            @if(
+                                request()->routeIs('products.*') ||
+                                request()->routeIs('categories.*') ||
+                                request()->routeIs('accessories.*') ||
+                                request()->routeIs('orders.*') ||
+                                request()->routeIs('users.*') ||
+                                request()->routeIs('order-items.*')
+                            )
+                                active fw-bold
+                            @endif"
+                           href="#"
+                           role="button"
+                           data-bs-toggle="dropdown">
+                            ⚙️ Panel admina
+                        </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('categories.index') }}">Kategorie</a>
-                    </li>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                                   href="{{ route('products.index') }}">
+                                    🖨️ Produkty
+                                </a>
+                            </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('accessories.index') }}">Akcesoria</a>
-                    </li>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('categories.*') ? 'active' : '' }}"
+                                   href="{{ route('categories.index') }}">
+                                    🗂️ Kategorie
+                                </a>
+                            </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('orders.index') }}">Zamówienia</a>
-                    </li>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('accessories.*') ? 'active' : '' }}"
+                                   href="{{ route('accessories.index') }}">
+                                    🔧 Akcesoria
+                                </a>
+                            </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('users.index') }}">Użytkownicy</a>
-                    </li>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('orders.*') ? 'active' : '' }}"
+                                   href="{{ route('orders.index') }}">
+                                    🧾 Zamówienia
+                                </a>
+                            </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('order-items.index') }}">Pozycje zamówień</a>
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('users.*') ? 'active' : '' }}"
+                                   href="{{ route('users.index') }}">
+                                    👤 Użytkownicy
+                                </a>
+                            </li>
+
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('order-items.*') ? 'active' : '' }}"
+                                   href="{{ route('order-items.index') }}">
+                                    📋 Pozycje zamówień
+                                </a>
+                            </li>
+                        </ul>
                     </li>
                 @endif
             </ul>
 
-            <ul class="navbar-nav">
+            <ul class="navbar-nav align-items-lg-center">
                 @if(session('user_id'))
                     <li class="nav-item">
                         <span class="nav-link">
-                            Zalogowany: {{ session('user_name') }}
+                            👋 {{ session('user_name') }}
+
                             @if(session('user_role') === 'admin')
-                                (admin)
+                                <span class="badge bg-warning text-dark">admin</span>
                             @else
-                                (klient)
+                                <span class="badge bg-info text-dark">klient</span>
                             @endif
                         </span>
                     </li>
@@ -77,18 +139,25 @@
                     <li class="nav-item">
                         <form method="POST" action="{{ route('auth.logout') }}">
                             @csrf
-                            <button class="btn btn-outline-light btn-sm mt-1" type="submit">
-                                Wyloguj
+
+                            <button class="btn btn-outline-light btn-sm ms-lg-2" type="submit">
+                                🚪 Wyloguj
                             </button>
                         </form>
                     </li>
                 @else
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('auth.login') }}">Logowanie</a>
+                        <a class="nav-link {{ request()->routeIs('auth.login') ? 'active fw-bold' : '' }}"
+                           href="{{ route('auth.login') }}">
+                            🔐 Logowanie
+                        </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('auth.register') }}">Rejestracja</a>
+                        <a class="nav-link {{ request()->routeIs('auth.register') ? 'active fw-bold' : '' }}"
+                           href="{{ route('auth.register') }}">
+                            📝 Rejestracja
+                        </a>
                     </li>
                 @endif
             </ul>

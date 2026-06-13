@@ -98,6 +98,7 @@ Użytkownik może:
 - wybierać kategorie produktów,
 - przeglądać produkty promowane,
 - wyszukiwać produkty,
+- sprawdzać szczegóły produktu,
 - dodawać produkty do koszyka,
 - składać zamówienia,
 - przeglądać swoje zamówienia,
@@ -185,6 +186,7 @@ Strona klienta zawiera:
 - produkty promowane,
 - karuzelę produktów promowanych,
 - stronę wybranej kategorii,
+- szczegóły produktu,
 - wyszukiwarkę produktów,
 - koszyk,
 - historię zamówień klienta.
@@ -195,6 +197,7 @@ Główne adresy klienta:
 ```txt
 /
 category/{id}
+product/{id}
 cart
 my-orders
 my-orders/{id}
@@ -228,6 +231,8 @@ Adresy panelu administracyjnego:
 
 Zwykły klient nie ma dostępu do tych stron.
 
+W górnym menu panel administratora jest pokazany jako rozwijana lista, żeby menu było krótsze i czytelniejsze.
+
 ---
 
 ## 9. Koszyk i zamówienia
@@ -254,6 +259,8 @@ oraz pozycje zamówienia w tabeli:
 ```txt
 OrderItems
 ```
+
+W górnym menu obok koszyka wyświetla się licznik produktów znajdujących się w koszyku.
 
 ---
 
@@ -287,7 +294,43 @@ Po złożeniu zamówienia stan magazynowy produktu jest automatycznie zmniejszan
 
 ---
 
-## 11. Produkty promowane
+## 11. Szczegóły produktu
+
+Aplikacja ma osobną stronę szczegółów produktu:
+
+```txt
+/product/{id}
+```
+
+Na liście produktów pokazane są najważniejsze informacje:
+
+```txt
+- nazwa,
+- krótki opis,
+- kategoria,
+- cena,
+- stan magazynowy,
+- przycisk szczegółów,
+- przycisk dodania do koszyka.
+```
+
+Na stronie szczegółów produktu pokazane są pełniejsze dane:
+
+```txt
+- nazwa produktu,
+- pełny opis,
+- cena,
+- stan magazynowy,
+- kategoria,
+- obrazek,
+- informacja czy produkt jest promowany,
+- pasujące akcesoria,
+- przycisk dodania do koszyka.
+```
+
+---
+
+## 12. Produkty promowane
 
 Produkty mają pole:
 
@@ -306,7 +349,29 @@ Dzięki temu strona główna nie pokazuje wszystkich produktów, tylko wybrane p
 
 ---
 
-## 12. Usuwanie rekordów
+## 13. Górne menu
+
+Górne menu zawiera ikonki oraz tekst.
+
+Przykładowe elementy menu:
+
+```txt
+🏠 Start
+🛒 Koszyk
+📦 Moje zamówienia
+⚙️ Panel admina
+🔐 Logowanie
+📝 Rejestracja
+🚪 Wyloguj
+```
+
+Menu pokazuje aktywną stronę przez podświetlenie linku.
+
+Dla administratora linki panelu administracyjnego są umieszczone w rozwijanym menu.
+
+---
+
+## 14. Usuwanie rekordów
 
 W projekcie nie usuwam rekordów fizycznie z bazy.
 
@@ -320,7 +385,7 @@ Dzięki temu rekord zostaje w bazie danych, ale nie jest wyświetlany w aplikacj
 
 ---
 
-## 13. Struktura katalogów
+## 15. Struktura katalogów
 
 Najważniejsze katalogi:
 
@@ -336,7 +401,7 @@ database                - skrypt SQL bazy danych
 
 ---
 
-## 14. Uruchomienie projektu
+## 16. Uruchomienie projektu
 
 Wejście do katalogu projektu:
 
@@ -372,14 +437,17 @@ http://127.0.0.1:8000
 
 ---
 
-## 15. Testowe sprawdzenie aplikacji
+## 17. Testowe sprawdzenie aplikacji
 
 Warto sprawdzić:
 
 ```txt
 - czy działa strona główna,
 - czy działają kategorie,
+- czy działa strona szczegółów produktu,
 - czy działają produkty promowane,
+- czy działa licznik koszyka w menu,
+- czy działa rozwijane menu administratora,
 - czy działa koszyk,
 - czy nie można kupić produktu bez stanu magazynowego,
 - czy po zakupie zmniejsza się Stock,
@@ -387,27 +455,4 @@ Warto sprawdzić:
 - czy klient nie ma dostępu do panelu admina,
 - czy admin ma dostęp do panelu admina,
 - czy działają operacje CRUD.
-```
-
----
-
-## 16. Najważniejsze elementy do obrony
-
-W projekcie warto umieć wyjaśnić:
-
-```txt
-- strukturę bazy danych,
-- relacje między tabelami,
-- relację wiele-do-wielu,
-- działanie MVC,
-- działanie modeli, kontrolerów i serwisów,
-- logowanie i hashowanie haseł,
-- role admin/client,
-- middleware,
-- koszyk w sesji,
-- składanie zamówienia,
-- historię zamówień klienta,
-- obsługę magazynu,
-- produkty promowane,
-- dezaktywację przez IsActive.
 ```
