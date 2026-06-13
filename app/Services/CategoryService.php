@@ -19,6 +19,14 @@ class CategoryService
         return $query->get();
     }
 
+    public function getActive(): Collection
+    {
+        // pobieram aktywne kategorie do wyboru na stronie sklepu
+        return Category::where('IsActive', 1)
+            ->orderBy('Name')
+            ->get();
+    }
+
     public function getById(int $id): Category
     {
         return Category::findOrFail($id);

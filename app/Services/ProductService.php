@@ -5,12 +5,13 @@ namespace App\Services;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class ProductService
 {
     public function getAll(Request $request): Collection
     {
-        // tu pobieram produkty i robie wyszukiwanie
+        // tu pobieram produkty do panelu admina
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1);
 
@@ -19,6 +20,25 @@ class ProductService
         }
 
         return $query->get();
+    }
+
+    public function getForShop(Request $request): LengthAwarePaginator
+    {
+        // tu pobieram produkty do widoku klienta
+        $query = Product::with(['category', 'accessories'])
+            ->where('IsActive', 1);
+
+        if ($request->query('search')) {
+            $query->where('Name', 'like', '%' . $request->query('search') . '%');
+        }
+
+        if ($request->query('category_id')) {
+            $query->where('CategoryId', $request->query('category_id'));
+        }
+
+        return $query->orderBy('Name')
+            ->paginate(6)
+            ->withQueryString();
     }
 
     public function getById(int $id): Product
