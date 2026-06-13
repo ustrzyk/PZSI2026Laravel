@@ -42,6 +42,7 @@ CREATE TABLE Products (
     Stock INT NOT NULL,
     CategoryId INT NOT NULL,
     ImageUrl VARCHAR(255),
+    IsPromoted BIT NOT NULL,
     CreationDateTime DATETIME NOT NULL,
     EditDateTime DATETIME NOT NULL,
     IsActive BIT NOT NULL,
@@ -111,11 +112,11 @@ VALUES
 ('Dysza 0.4mm', 'Standardowa dysza do drukarek FDM.', 19.99, NOW(), NOW(), 1),
 ('Stół magnetyczny', 'Elastyczna powierzchnia robocza do drukarki.', 89.99, NOW(), NOW(), 1);
 
-INSERT INTO Products (Name, Description, Price, Stock, CategoryId, ImageUrl, CreationDateTime, EditDateTime, IsActive)
+INSERT INTO Products (Name, Description, Price, Stock, CategoryId, ImageUrl, IsPromoted, CreationDateTime, EditDateTime, IsActive)
 VALUES
-('Creality Ender 3 V3', 'Popularna drukarka 3D dla początkujących.', 999.99, 10, 1, '', NOW(), NOW(), 1),
-('Bambu Lab A1 Mini', 'Szybka drukarka 3D do małego warsztatu.', 1499.99, 5, 1, '', NOW(), NOW(), 1),
-('Filament PETG Czarny', 'Filament odporny i dobry do części technicznych.', 89.99, 30, 2, '', NOW(), NOW(), 1);
+('Creality Ender 3 V3', 'Popularna drukarka 3D dla początkujących.', 999.99, 10, 1, '', 1, NOW(), NOW(), 1),
+('Bambu Lab A1 Mini', 'Szybka drukarka 3D do małego warsztatu.', 1499.99, 5, 1, '', 1, NOW(), NOW(), 1),
+('Filament PETG Czarny', 'Filament odporny i dobry do części technicznych.', 89.99, 30, 2, '', 1, NOW(), NOW(), 1);
 
 INSERT INTO ProductAccessories (ProductId, AccessoryId)
 VALUES

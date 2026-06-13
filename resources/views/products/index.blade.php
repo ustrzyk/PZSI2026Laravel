@@ -40,6 +40,7 @@
                 <th>Kategoria</th>
                 <th>Cena</th>
                 <th>Stan</th>
+                <th>Promowany</th>
                 <th>Akcesoria</th>
                 <th>Akcje</th>
             </tr>
@@ -53,6 +54,13 @@
                     <td>{{ $product->category->Name ?? 'Brak' }}</td>
                     <td>{{ number_format($product->Price, 2) }} zł</td>
                     <td>{{ $product->Stock }}</td>
+                    <td>
+                        @if((int)$product->IsPromoted == 1)
+                            <span class="badge bg-warning text-dark">Tak</span>
+                        @else
+                            <span class="badge bg-secondary">Nie</span>
+                        @endif
+                    </td>
                     <td>
                         @if($product->accessories->count() > 0)
                             @foreach($product->accessories as $accessory)

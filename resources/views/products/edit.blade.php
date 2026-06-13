@@ -70,6 +70,21 @@
                 </div>
 
                 <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="IsPromoted"
+                               value="1"
+                               id="IsPromoted"
+                               @if((int)old('IsPromoted', $product->IsPromoted) == 1) checked @endif>
+
+                        <label class="form-check-label" for="IsPromoted">
+                            Produkt promowany na stronie głównej
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-3">
                     <label class="form-label">Akcesoria</label>
 
                     @php

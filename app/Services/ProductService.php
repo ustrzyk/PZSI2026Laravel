@@ -22,9 +22,45 @@ class ProductService
         return $query->get();
     }
 
+    public function getPromotedForShop(Request $request): Collection
+    {
+        // tu pobieram tylko produkty promowane na stronę główną
+        $query = Product::with(['category', 'accessories'])
+            ->where('IsActive', 1)
+            ->where('IsPromoted', 1);
+
+        if ($request->query('search')) {
+            $query->where('Name', 'like', '%' . $request->query('search') . '%');
+        }
+
+        if ($request->query('category_id')) {
+            $query->where('CategoryId', $request->query('category_id'));
+        }
+
+        return $query->orderBy('Name')
+            ->take(12)
+            ->get();
+    }
+
+    public function getForCategory(Request $request, int $categoryId): LengthAwarePaginator
+    {
+        // tu pobieram produkty tylko z jednej kategorii
+        $query = Product::with(['category', 'accessories'])
+            ->where('IsActive', 1)
+            ->where('CategoryId', $categoryId);
+
+        if ($request->query('search')) {
+            $query->where('Name', 'like', '%' . $request->query('search') . '%');
+        }
+
+        return $query->orderBy('Name')
+            ->paginate(6)
+            ->withQueryString();
+    }
+
     public function getForShop(Request $request): LengthAwarePaginator
     {
-        // tu pobieram produkty do widoku klienta
+        // zostawiam tę metodę jako awaryjną listę produktów
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1);
 
@@ -56,6 +92,7 @@ class ProductService
             'Stock' => ['required', 'integer', 'min:0'],
             'CategoryId' => ['required', 'integer', 'exists:Categories,Id'],
             'ImageUrl' => ['nullable', 'string', 'max:255'],
+            'IsPromoted' => ['nullable'],
             'Accessories' => ['nullable', 'array'],
         ]);
 
@@ -66,6 +103,7 @@ class ProductService
         $model->Stock = $request->input('Stock');
         $model->CategoryId = $request->input('CategoryId');
         $model->ImageUrl = $request->input('ImageUrl');
+        $model->IsPromoted = $request->has('IsPromoted') ? 1 : 0;
         $model->CreationDateTime = now();
         $model->EditDateTime = now();
         $model->IsActive = 1;
@@ -84,6 +122,7 @@ class ProductService
             'Stock' => ['required', 'integer', 'min:0'],
             'CategoryId' => ['required', 'integer', 'exists:Categories,Id'],
             'ImageUrl' => ['nullable', 'string', 'max:255'],
+            'IsPromoted' => ['nullable'],
             'Accessories' => ['nullable', 'array'],
         ]);
 
@@ -94,6 +133,7 @@ class ProductService
         $model->Stock = $request->input('Stock');
         $model->CategoryId = $request->input('CategoryId');
         $model->ImageUrl = $request->input('ImageUrl');
+        $model->IsPromoted = $request->has('IsPromoted') ? 1 : 0;
         $model->EditDateTime = now();
         $model->save();
 
