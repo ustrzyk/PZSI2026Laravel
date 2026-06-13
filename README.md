@@ -104,6 +104,7 @@ Aktualnie wykonano:
 12. Dodanie logiki obsługi zamówień z koszyka.
 13. Utworzenie kontrolerów Laravel.
 14. Połączenie kontrolerów z serwisami.
+15. Przygotowanie tras aplikacji w pliku routes/web.php.
 ```
 
 ---
@@ -130,7 +131,7 @@ app/Models              - tutaj są modele
 app/Http/Controllers    - tutaj są kontrolery
 app/Services            - tutaj są serwisy z logiką biznesową
 resources/views         - tutaj będą widoki Blade
-routes/web.php          - tutaj będą trasy strony
+routes/web.php          - tutaj są trasy strony
 database                - tutaj jest plik SQL bazy danych
 ```
 
@@ -792,7 +793,112 @@ Przykład:
 
 ---
 
-## 21. Dziennik pracy
+## 21. Trasy aplikacji
+
+Trasy aplikacji znajdują się w pliku:
+
+```txt
+routes/web.php
+```
+
+Trasy łączą adresy URL z odpowiednimi kontrolerami.
+
+Strona główna sklepu:
+
+```php
+Route::get('/', [ShopController::class, 'index'])->name('shop.index');
+```
+
+Logowanie i rejestracja:
+
+```php
+Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('auth.login.post');
+Route::get('/register', [AuthController::class, 'register'])->name('auth.register');
+Route::post('/register', [AuthController::class, 'registerPost'])->name('auth.register.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+```
+
+Przykład tras produktów:
+
+```php
+Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
+Route::get('/products/edit/{id}', [ProductController::class, 'edit'])->name('products.edit');
+Route::put('/products/edit/{id}', [ProductController::class, 'update'])->name('products.update');
+Route::delete('/products/delete/{id}', [ProductController::class, 'delete'])->name('products.delete');
+```
+
+Przykład tras koszyka:
+
+```php
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/order', [CartController::class, 'order'])->name('cart.order');
+```
+
+W trasach używam:
+
+```txt
+- GET do wyświetlania stron,
+- POST do dodawania danych,
+- PUT do aktualizacji danych,
+- DELETE do dezaktywacji danych,
+- query params do wyszukiwania,
+- url params do pobierania konkretnego rekordu.
+```
+
+---
+
+## 22. Query params, URL params i POST
+
+Przykład query params:
+
+```txt
+/products?search=bambu
+```
+
+W kodzie pobieram to przez:
+
+```php
+$request->query('search')
+```
+
+Przykład URL params:
+
+```txt
+/products/edit/1
+```
+
+W trasie jest to zapisane jako:
+
+```php
+Route::get('/products/edit/{id}', [ProductController::class, 'edit'])->name('products.edit');
+```
+
+W metodzie kontrolera odbieram to jako:
+
+```php
+public function edit(Request $request, int $id)
+```
+
+Przykład POST:
+
+```php
+Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
+```
+
+Dane z formularza będą później odbierane przez:
+
+```php
+$request->input('Name')
+```
+
+---
+
+## 23. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1015,11 +1121,45 @@ public function __construct(ProductService $productService)
 
 Dzięki temu kontroler nie musi zawierać całej logiki biznesowej, tylko wywołuje odpowiedni serwis.
 
-Na tym etapie projekt ma przygotowane modele, serwisy i kontrolery. Następnym krokiem będzie dodanie tras w pliku `routes/web.php`.
+### Krok 7 - trasy aplikacji
+
+Dodałem trasy aplikacji w pliku:
+
+```txt
+routes/web.php
+```
+
+Trasy łączą adresy URL z kontrolerami.
+
+Dodałem trasy dla:
+
+```txt
+- strony głównej sklepu,
+- logowania,
+- rejestracji,
+- produktów,
+- kategorii,
+- akcesoriów,
+- użytkowników,
+- koszyka,
+- zamówień,
+- pozycji zamówień.
+```
+
+W trasach używam metod:
+
+```txt
+GET
+POST
+PUT
+DELETE
+```
+
+Dzięki temu projekt ma przygotowaną obsługę adresów URL. Następnym krokiem będzie dodanie widoków Blade.
 
 ---
 
-## 22. Jak wgrać bazę danych
+## 24. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1048,7 +1188,32 @@ pzsi-druk-3d
 
 ---
 
-## 23. Jak uruchomić projekt
+## 25. Jak sprawdzić trasy
+
+Po dodaniu tras można sprawdzić ich listę komendą:
+
+```bash
+php artisan route:list
+```
+
+Powinny pojawić się między innymi trasy:
+
+```txt
+/
+login
+register
+products
+categories
+accessories
+users
+cart
+orders
+order-items
+```
+
+---
+
+## 26. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1080,34 +1245,39 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
+Na tym etapie po wejściu na część adresów może pojawić się błąd brakującego widoku, ponieważ widoki Blade zostaną dodane w następnym kroku.
+
 ---
 
-## 24. Następny krok
+## 27. Następny krok
 
-Następnie zostaną przygotowane trasy aplikacji w pliku:
+Następnie zostaną przygotowane widoki Blade.
 
-```txt
-routes/web.php
-```
-
-Trasy połączą adresy URL z kontrolerami.
-
-Przykładowo:
+Widoki będą znajdować się w katalogu:
 
 ```txt
-/products -> ProductController@index
-/products/create -> ProductController@create
-/products/edit/{id} -> ProductController@edit
+resources/views
 ```
 
-W trasach zostaną użyte:
+Najpierw zostanie przygotowany główny layout:
 
 ```txt
-- query params,
-- url params,
-- POST,
-- PUT,
-- DELETE.
+resources/views/main.blade.php
 ```
 
+Następnie zostaną dodane widoki dla:
 
+```txt
+- strony głównej sklepu,
+- produktów,
+- kategorii,
+- akcesoriów,
+- logowania,
+- rejestracji,
+- koszyka,
+- zamówień,
+- użytkowników,
+- pozycji zamówień.
+```
+
+Po dodaniu widoków aplikacja zacznie wyświetlać normalne strony w przeglądarce.
