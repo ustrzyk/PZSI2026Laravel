@@ -2,7 +2,7 @@
 
 Projekt wykonywany na przedmiot **Programowanie Zaawansowanych Serwisów Internetowych**.
 
-Aplikacja będzie prostym sklepem internetowym z drukarkami 3D oraz akcesoriami, takimi jak filamenty, dysze i części zamienne.
+Aplikacja jest prostym sklepem internetowym z drukarkami 3D oraz akcesoriami, takimi jak filamenty, dysze i części zamienne.
 
 Projekt jest wykonywany w frameworku **Laravel** z wykorzystaniem architektury **MVC**.
 
@@ -41,7 +41,7 @@ Git
 
 Celem projektu jest stworzenie prostego sklepu internetowego z drukarkami 3D.
 
-Użytkownik będzie mógł:
+Użytkownik może:
 
 ```txt
 - przeglądać produkty,
@@ -52,13 +52,22 @@ Użytkownik będzie mógł:
 - logować się.
 ```
 
-Dodatkowo od strony administracyjnej będzie można zarządzać produktami, kategoriami, akcesoriami, użytkownikami i zamówieniami.
+Administrator może zarządzać:
+
+```txt
+- produktami,
+- kategoriami,
+- akcesoriami,
+- użytkownikami,
+- zamówieniami,
+- pozycjami zamówień.
+```
 
 ---
 
 ## 3. Założenia projektu
 
-Projekt będzie zawierał:
+Projekt zawiera:
 
 ```txt
 - bazę danych z minimum 5 tabelami,
@@ -70,18 +79,21 @@ Projekt będzie zawierał:
 - routing,
 - kontrolery,
 - modele,
+- serwisy,
 - widoki Blade,
 - logowanie i rejestrację użytkownika,
+- role użytkowników,
+- zabezpieczenie panelu administracyjnego,
 - koszyk zapisany w sesji.
 ```
 
-Usuwanie rekordów będzie realizowane jako dezaktywacja:
+Usuwanie rekordów jest realizowane jako dezaktywacja:
 
 ```txt
 IsActive = 0
 ```
 
-Dzięki temu rekord zostaje w bazie, ale nie jest wyświetlany w aplikacji.
+Dzięki temu rekord zostaje w bazie danych, ale nie jest wyświetlany w aplikacji.
 
 ---
 
@@ -116,6 +128,10 @@ Aktualnie wykonano:
 24. Utworzenie widoków CRUD dla użytkowników.
 25. Utworzenie widoków dla zamówień.
 26. Utworzenie widoków CRUD dla pozycji zamówień.
+27. Przetłumaczenie statusów zamówienia w widoku na język polski.
+28. Dodanie automatycznego przeliczania wartości zamówienia po zmianie pozycji.
+29. Dodanie ról użytkowników: admin i client.
+30. Dodanie zabezpieczenia panelu administracyjnego middleware.
 ```
 
 ---
@@ -138,12 +154,13 @@ storage
 Opis wybranych katalogów:
 
 ```txt
-app/Models              - tutaj są modele
-app/Http/Controllers    - tutaj są kontrolery
-app/Services            - tutaj są serwisy z logiką biznesową
-resources/views         - tutaj są widoki Blade
-routes/web.php          - tutaj są trasy strony
-database                - tutaj jest plik SQL bazy danych
+app/Models              - modele aplikacji
+app/Http/Controllers    - kontrolery
+app/Http/Middleware     - middleware zabezpieczające dostęp
+app/Services            - serwisy z logiką biznesową
+resources/views         - widoki Blade
+routes/web.php          - trasy aplikacji
+database                - plik SQL bazy danych
 ```
 
 ---
@@ -248,7 +265,58 @@ Czyli jeden produkt może mieć wiele akcesoriów, a jedno akcesorium może paso
 
 ---
 
-## 8. Plik SQL
+## 8. Tabela Users i role
+
+Tabela `Users` przechowuje użytkowników aplikacji.
+
+Najważniejsze pola:
+
+```txt
+Id
+Name
+Email
+Password
+Role
+CreationDateTime
+EditDateTime
+IsActive
+```
+
+Pole `Email` w tym projekcie pełni funkcję loginu.
+
+Pole `Password` przechowuje hasło w formie zahashowanej.
+
+Pole `Role` określa uprawnienia użytkownika.
+
+Dostępne role:
+
+```txt
+admin
+client
+```
+
+Znaczenie ról:
+
+```txt
+admin  - ma dostęp do panelu administracyjnego
+client - zwykły klient sklepu
+```
+
+Użytkownik startowy dodany w skrypcie SQL ma rolę:
+
+```txt
+admin
+```
+
+Nowy użytkownik utworzony przez rejestrację dostaje automatycznie rolę:
+
+```txt
+client
+```
+
+---
+
+## 9. Plik SQL
 
 Plik SQL tworzy bazę danych:
 
@@ -276,6 +344,21 @@ DROP TABLE IF EXISTS Categories;
 DROP TABLE IF EXISTS Users;
 ```
 
+Przykład tabeli użytkowników z rolą:
+
+```sql
+CREATE TABLE Users (
+    Id INT AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(100) NOT NULL,
+    Email VARCHAR(150) NOT NULL UNIQUE,
+    Password VARCHAR(255) NOT NULL,
+    Role VARCHAR(20) NOT NULL,
+    CreationDateTime DATETIME NOT NULL,
+    EditDateTime DATETIME NOT NULL,
+    IsActive BIT NOT NULL
+);
+```
+
 Przykład klucza obcego:
 
 ```sql
@@ -293,39 +376,6 @@ CREATE TABLE ProductAccessories (
     FOREIGN KEY (AccessoryId) REFERENCES Accessories(Id)
 );
 ```
-
-Dodałem też dane testowe, żeby od razu było co wyświetlać w aplikacji.
-
----
-
-## 9. Użytkownik testowy
-
-W bazie jest dodany użytkownik testowy.
-
-W tabeli `Users` login jest zapisany w kolumnie:
-
-```txt
-Email
-```
-
-Czyli w bazie użytkownik ma uzupełnione między innymi pola:
-
-```txt
-Name
-Email
-Password
-```
-
-Hasło nie jest zapisane zwykłym tekstem.
-W SQL jest zapisany hash hasła.
-
-W kodzie logowania hasło będzie sprawdzane przez:
-
-```php
-Hash::check()
-```
-
-Dane testowe nie są wyświetlane na formularzu logowania.
 
 ---
 
@@ -364,6 +414,8 @@ Bambu Lab A1 Mini -> Filament PLA 1kg
 Bambu Lab A1 Mini -> Stół magnetyczny
 ```
 
+Dane logowania nie są wyświetlane w formularzu logowania.
+
 ---
 
 ## 11. Modele Laravel
@@ -393,32 +445,32 @@ Przykładowo model `Product` odpowiada tabeli:
 Products
 ```
 
-W modelach ustawiłem nazwy tabel:
+W modelach ustawiono nazwy tabel:
 
 ```php
 protected $table = 'Products';
 ```
 
-Ustawiłem też klucz główny:
+Ustawiono też klucz główny:
 
 ```php
 protected $primaryKey = 'Id';
 ```
 
-Ponieważ w bazie używam własnych nazw pól dat, w modelach ustawiłem:
+Ponieważ w bazie używane są własne nazwy pól dat, w modelach ustawiono:
 
 ```php
 const CREATED_AT = 'CreationDateTime';
 const UPDATED_AT = 'EditDateTime';
 ```
 
-Dzięki temu Laravel wie, że ma używać moich kolumn dat zamiast domyślnych `created_at` i `updated_at`.
+Dzięki temu Laravel używa kolumn `CreationDateTime` i `EditDateTime` zamiast domyślnych `created_at` i `updated_at`.
 
 ---
 
 ## 12. Relacje w modelach
 
-W modelach dodałem relacje między tabelami.
+W modelach dodano relacje między tabelami.
 
 Relacja kategorii z produktami:
 
@@ -511,7 +563,8 @@ Order -> OrderItems
 W modelu `Order`:
 
 ```php
-return $this->hasMany(OrderItem::class, 'OrderId', 'Id');
+return $this->hasMany(OrderItem::class, 'OrderId', 'Id')
+    ->where('IsActive', 1);
 ```
 
 Relacja pozycji zamówienia z zamówieniem:
@@ -573,14 +626,132 @@ W serwisach znajdują się metody do:
 - walidacji formularzy,
 - obsługi logowania,
 - obsługi rejestracji,
-- obsługi zamówień z koszyka.
+- obsługi koszyka,
+- obsługi zamówień,
+- przeliczania wartości zamówienia.
 ```
 
 Dzięki temu kontrolery są krótsze, bo większość logiki jest przeniesiona do serwisów.
 
 ---
 
-## 14. Walidacja w serwisach
+## 14. AuthService
+
+Serwis `AuthService` odpowiada za:
+
+```txt
+- rejestrację,
+- logowanie,
+- wylogowanie.
+```
+
+Podczas rejestracji hasło jest hashowane:
+
+```php
+Hash::make($request->input('Password'))
+```
+
+Nowy użytkownik z rejestracji otrzymuje rolę:
+
+```txt
+client
+```
+
+Podczas logowania hasło jest sprawdzane przez:
+
+```php
+Hash::check($request->input('Password'), $user->Password)
+```
+
+Po poprawnym logowaniu do sesji zapisywane są:
+
+```php
+session(['user_id' => $user->Id]);
+session(['user_name' => $user->Name]);
+session(['user_role' => $user->Role]);
+```
+
+Wylogowanie usuwa dane z sesji:
+
+```php
+session()->forget('user_id');
+session()->forget('user_name');
+session()->forget('user_role');
+```
+
+---
+
+## 15. UserService
+
+Serwis `UserService` odpowiada za zarządzanie użytkownikami.
+
+Obsługuje:
+
+```txt
+- listę użytkowników,
+- wyszukiwanie użytkowników,
+- dodawanie użytkownika,
+- edycję użytkownika,
+- zmianę roli użytkownika,
+- zmianę hasła,
+- dezaktywację użytkownika.
+```
+
+Podczas dodawania i edycji użytkownika walidowana jest rola:
+
+```php
+'Role' => ['required', 'string', 'in:admin,client']
+```
+
+Jeżeli administrator edytuje samego siebie, dane w sesji są aktualizowane:
+
+```php
+session(['user_name' => $model->Name]);
+session(['user_role' => $model->Role]);
+```
+
+---
+
+## 16. OrderItemService i przeliczanie wartości zamówienia
+
+W projekcie dodano poprawkę, która automatycznie przelicza wartość zamówienia po zmianie pozycji zamówienia.
+
+Dotyczy to sytuacji, gdy:
+
+```txt
+- dodano pozycję zamówienia,
+- edytowano pozycję zamówienia,
+- zmieniono ilość produktu,
+- zmieniono produkt,
+- przeniesiono pozycję do innego zamówienia,
+- zdezaktywowano pozycję zamówienia.
+```
+
+Po każdej takiej operacji przeliczane jest pole:
+
+```txt
+Orders.TotalPrice
+```
+
+Dzięki temu wartość zamówienia zgadza się z sumą pozycji zamówienia.
+
+Metoda odpowiedzialna za przeliczanie:
+
+```php
+private function recalculateOrderTotal(int $orderId): void
+```
+
+Ogólny mechanizm:
+
+```php
+$total += $item->Price * $item->Quantity;
+$order->TotalPrice = $total;
+$order->save();
+```
+
+---
+
+## 17. Walidacja formularzy
 
 Walidacja formularzy jest wykonywana w serwisach przez:
 
@@ -602,7 +773,7 @@ $request->validate([
 ]);
 ```
 
-W tej walidacji sprawdzam między innymi:
+W tej walidacji sprawdzane jest między innymi:
 
 ```txt
 - czy nazwa produktu jest wymagana,
@@ -613,19 +784,31 @@ W tej walidacji sprawdzam między innymi:
 - czy lista akcesoriów jest tablicą.
 ```
 
+Przykład walidacji statusu zamówienia:
+
+```php
+'Status' => ['required', 'string', 'max:50', 'in:New,Paid,Sent,Finished']
+```
+
+Przykład walidacji roli użytkownika:
+
+```php
+'Role' => ['required', 'string', 'in:admin,client']
+```
+
 ---
 
-## 15. Wyszukiwanie w serwisach
+## 18. Wyszukiwanie
 
 Wyszukiwanie jest realizowane przez query params.
 
-Przykładowy adres:
+Przykład:
 
 ```txt
 /products?search=bambu
 ```
 
-W serwisie pobieram parametr:
+W kodzie parametr pobierany jest przez:
 
 ```php
 $request->query('search')
@@ -639,15 +822,24 @@ if ($request->query('search')) {
 }
 ```
 
-Dzięki temu można wyszukiwać dane po nazwie.
+Wyszukiwanie działa między innymi dla:
+
+```txt
+- produktów,
+- kategorii,
+- akcesoriów,
+- użytkowników,
+- zamówień,
+- pozycji zamówień.
+```
 
 ---
 
-## 16. Dezaktywacja rekordów
+## 19. Dezaktywacja rekordów
 
 Rekordy nie są usuwane fizycznie z bazy.
 
-Zamiast tego ustawiam:
+Zamiast tego ustawiane jest:
 
 ```php
 $model->IsActive = 0;
@@ -657,89 +849,174 @@ $model->save();
 
 Dzięki temu rekord zostaje w bazie danych, ale nie powinien być wyświetlany w aplikacji.
 
----
-
-## 17. Logowanie i rejestracja
-
-Logika logowania i rejestracji znajduje się w serwisie:
+Tak działa dezaktywacja:
 
 ```txt
-AuthService
-```
-
-Podczas rejestracji hasło jest zapisywane jako hash:
-
-```php
-Hash::make($request->input('Password'))
-```
-
-Podczas logowania hasło jest sprawdzane przez:
-
-```php
-Hash::check($request->input('Password'), $user->Password)
-```
-
-Po poprawnym logowaniu dane użytkownika są zapisywane w sesji:
-
-```php
-session(['user_id' => $user->Id]);
-session(['user_name' => $user->Name]);
-```
-
-Wylogowanie usuwa dane z sesji:
-
-```php
-session()->forget('user_id');
-session()->forget('user_name');
+- produktów,
+- kategorii,
+- akcesoriów,
+- użytkowników,
+- zamówień,
+- pozycji zamówień.
 ```
 
 ---
 
-## 18. Obsługa koszyka i zamówień
+## 20. Middleware i zabezpieczenie dostępu
 
-Koszyk będzie przechowywany w sesji Laravel.
-
-W serwisie `OrderService` dodana jest metoda:
+Middleware znajdują się w katalogu:
 
 ```txt
-createFromCart()
+app/Http/Middleware
 ```
 
-Metoda ta tworzy zamówienie na podstawie produktów zapisanych w koszyku.
-
-Najpierw pobierany jest koszyk z sesji:
-
-```php
-$cart = session('cart', []);
-```
-
-Potem liczona jest suma zamówienia:
-
-```php
-$total += $product->Price * $quantity;
-```
-
-Następnie tworzony jest rekord w tabeli:
+Utworzone middleware:
 
 ```txt
-Orders
+CheckUserLogged
+CheckAdmin
 ```
 
-oraz pozycje zamówienia w tabeli:
+Middleware są zarejestrowane w pliku:
 
 ```txt
-OrderItems
+bootstrap/app.php
 ```
 
-Po złożeniu zamówienia koszyk jest czyszczony:
+Alias dla middleware zalogowanego użytkownika:
 
 ```php
-session()->forget('cart');
+'user.logged' => CheckUserLogged::class
+```
+
+Alias dla middleware administratora:
+
+```php
+'admin' => CheckAdmin::class
 ```
 
 ---
 
-## 19. Kontrolery Laravel
+## 21. CheckUserLogged
+
+Middleware `CheckUserLogged` sprawdza, czy użytkownik jest zalogowany.
+
+Jeżeli użytkownik nie jest zalogowany, zostaje przekierowany na logowanie.
+
+Ten middleware chroni operację składania zamówienia:
+
+```txt
+/cart/order
+```
+
+Dzięki temu koszyk można przeglądać publicznie, ale zamówienie może złożyć tylko zalogowany użytkownik.
+
+---
+
+## 22. CheckAdmin
+
+Middleware `CheckAdmin` sprawdza dwie rzeczy:
+
+```txt
+1. Czy użytkownik jest zalogowany.
+2. Czy użytkownik ma rolę admin.
+```
+
+Jeżeli użytkownik nie jest zalogowany, zostaje przekierowany na logowanie.
+
+Jeżeli użytkownik jest zalogowany, ale nie jest administratorem, zostaje przekierowany na stronę główną sklepu i otrzymuje komunikat o braku dostępu.
+
+Panel administracyjny jest dostępny tylko dla roli:
+
+```txt
+admin
+```
+
+---
+
+## 23. Dostęp publiczny i administracyjny
+
+Publicznie dostępne strony:
+
+```txt
+/
+login
+register
+cart
+cart/add
+cart/remove
+```
+
+Dostępne dla zalogowanego użytkownika:
+
+```txt
+cart/order
+```
+
+Dostępne tylko dla administratora:
+
+```txt
+/products
+/categories
+/accessories
+/users
+/orders
+/order-items
+```
+
+---
+
+## 24. Trasy aplikacji
+
+Trasy aplikacji znajdują się w pliku:
+
+```txt
+routes/web.php
+```
+
+Strona główna sklepu:
+
+```php
+Route::get('/', [ShopController::class, 'index'])->name('shop.index');
+```
+
+Logowanie i rejestracja:
+
+```php
+Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/login', [AuthController::class, 'loginPost'])->name('auth.login.post');
+Route::get('/register', [AuthController::class, 'register'])->name('auth.register');
+Route::post('/register', [AuthController::class, 'registerPost'])->name('auth.register.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+```
+
+Koszyk:
+
+```php
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+```
+
+Składanie zamówienia przez zalogowanego użytkownika:
+
+```php
+Route::middleware('user.logged')->group(function () {
+    Route::post('/cart/order', [CartController::class, 'order'])->name('cart.order');
+});
+```
+
+Panel administracyjny:
+
+```php
+Route::middleware('admin')->group(function () {
+    // produkty, kategorie, akcesoria, użytkownicy, zamówienia, pozycje zamówień
+});
+```
+
+---
+
+## 25. Kontrolery Laravel
 
 Kontrolery znajdują się w katalogu:
 
@@ -763,13 +1040,11 @@ OrderItemController
 
 Kontrolery odpowiadają za obsługę żądań użytkownika.
 
-Schemat działania aplikacji wygląda tak:
+Schemat działania aplikacji:
 
 ```txt
 route -> controller -> service -> model -> database
 ```
-
-Kontroler odbiera żądanie z trasy, przekazuje dane do serwisu, a na końcu zwraca odpowiedni widok Blade.
 
 Przykład:
 
@@ -779,136 +1054,7 @@ Przykład:
 
 ---
 
-## 20. Rola poszczególnych kontrolerów
-
-`ShopController` odpowiada za stronę główną sklepu i wyświetlanie produktów.
-
-`ProductController` odpowiada za CRUD produktów.
-
-`CategoryController` odpowiada za CRUD kategorii.
-
-`AccessoryController` odpowiada za CRUD akcesoriów.
-
-`UserController` odpowiada za CRUD użytkowników.
-
-`AuthController` odpowiada za logowanie, rejestrację i wylogowanie.
-
-`CartController` odpowiada za koszyk, dodawanie produktów do koszyka, usuwanie produktów z koszyka i składanie zamówienia.
-
-`OrderController` odpowiada za listę zamówień, edycję statusu zamówienia i dezaktywację zamówienia.
-
-`OrderItemController` odpowiada za pozycje zamówień.
-
----
-
-## 21. Trasy aplikacji
-
-Trasy aplikacji znajdują się w pliku:
-
-```txt
-routes/web.php
-```
-
-Trasy łączą adresy URL z odpowiednimi kontrolerami.
-
-Strona główna sklepu:
-
-```php
-Route::get('/', [ShopController::class, 'index'])->name('shop.index');
-```
-
-Logowanie i rejestracja:
-
-```php
-Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
-Route::post('/login', [AuthController::class, 'loginPost'])->name('auth.login.post');
-Route::get('/register', [AuthController::class, 'register'])->name('auth.register');
-Route::post('/register', [AuthController::class, 'registerPost'])->name('auth.register.post');
-Route::post('/logout', [AuthController::class, 'logout'])->name('auth.logout');
-```
-
-Przykład tras produktów:
-
-```php
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
-Route::get('/products/edit/{id}', [ProductController::class, 'edit'])->name('products.edit');
-Route::put('/products/edit/{id}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/delete/{id}', [ProductController::class, 'delete'])->name('products.delete');
-```
-
-Przykład tras pozycji zamówień:
-
-```php
-Route::get('/order-items', [OrderItemController::class, 'index'])->name('order-items.index');
-Route::get('/order-items/create', [OrderItemController::class, 'create'])->name('order-items.create');
-Route::post('/order-items/create', [OrderItemController::class, 'store'])->name('order-items.store');
-Route::get('/order-items/edit/{id}', [OrderItemController::class, 'edit'])->name('order-items.edit');
-Route::put('/order-items/edit/{id}', [OrderItemController::class, 'update'])->name('order-items.update');
-Route::delete('/order-items/delete/{id}', [OrderItemController::class, 'delete'])->name('order-items.delete');
-```
-
-W trasach używam:
-
-```txt
-- GET do wyświetlania stron,
-- POST do dodawania danych,
-- PUT do aktualizacji danych,
-- DELETE do dezaktywacji danych,
-- query params do wyszukiwania,
-- url params do pobierania konkretnego rekordu.
-```
-
----
-
-## 22. Query params, URL params i POST
-
-Przykład query params:
-
-```txt
-/products?search=bambu
-```
-
-W kodzie pobieram to przez:
-
-```php
-$request->query('search')
-```
-
-Przykład URL params:
-
-```txt
-/products/edit/1
-```
-
-W trasie jest to zapisane jako:
-
-```php
-Route::get('/products/edit/{id}', [ProductController::class, 'edit'])->name('products.edit');
-```
-
-W metodzie kontrolera odbieram to jako:
-
-```php
-public function edit(Request $request, int $id)
-```
-
-Przykład POST:
-
-```php
-Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
-```
-
-Dane z formularza są odbierane przez:
-
-```php
-$request->input('Name')
-```
-
----
-
-## 23. Widoki Blade
+## 26. Widoki Blade
 
 Widoki Blade znajdują się w katalogu:
 
@@ -922,7 +1068,7 @@ Główny layout strony znajduje się w pliku:
 resources/views/main.blade.php
 ```
 
-Layout zawiera wspólne elementy strony:
+Layout zawiera:
 
 ```txt
 - nagłówek HTML,
@@ -945,9 +1091,15 @@ Pozostałe widoki korzystają z layoutu przez:
 @extends('main')
 ```
 
+Menu panelu administracyjnego jest widoczne tylko wtedy, gdy użytkownik ma rolę:
+
+```txt
+admin
+```
+
 ---
 
-## 24. Widok strony głównej sklepu
+## 27. Widok strony głównej sklepu
 
 Widok strony głównej sklepu znajduje się w pliku:
 
@@ -969,7 +1121,7 @@ Na stronie głównej są wyświetlane:
 - przycisk dodania produktu do koszyka.
 ```
 
-Na stronie głównej jest też wyszukiwarka produktów.
+Na stronie głównej jest wyszukiwarka produktów.
 
 Przykład wyszukiwania:
 
@@ -977,17 +1129,11 @@ Przykład wyszukiwania:
 /?search=bambu
 ```
 
-Produkt dodawany jest do koszyka przez formularz POST:
-
-```blade
-<form method="POST" action="{{ route('cart.add', $product->Id) }}">
-    @csrf
-</form>
-```
+Produkt dodawany jest do koszyka przez formularz POST.
 
 ---
 
-## 25. Widoki logowania i rejestracji
+## 28. Widoki logowania i rejestracji
 
 Widoki logowania i rejestracji znajdują się w folderze:
 
@@ -1018,6 +1164,7 @@ Password
 W projekcie pole `Email` działa jako login użytkownika.
 
 W widoku logowania nie są wyświetlane dane testowe.
+
 Pola formularza mają zwykłe placeholdery:
 
 ```txt
@@ -1039,9 +1186,15 @@ Email
 Password
 ```
 
+Nowy użytkownik z rejestracji otrzymuje rolę:
+
+```txt
+client
+```
+
 ---
 
-## 26. Widok koszyka
+## 29. Widok koszyka
 
 Widok koszyka znajduje się w pliku:
 
@@ -1061,22 +1214,6 @@ Koszyk pokazuje:
 - formularz złożenia zamówienia.
 ```
 
-Usunięcie produktu z koszyka jest wykonywane przez formularz POST:
-
-```blade
-<form method="POST" action="{{ route('cart.remove', $product->Id) }}">
-    @csrf
-</form>
-```
-
-Złożenie zamówienia jest wykonywane przez formularz POST:
-
-```blade
-<form method="POST" action="{{ route('cart.order') }}">
-    @csrf
-</form>
-```
-
 Dane zamówienia:
 
 ```txt
@@ -1087,7 +1224,7 @@ Address
 
 ---
 
-## 27. Widoki produktów
+## 30. Widoki produktów
 
 Widoki produktów znajdują się w katalogu:
 
@@ -1103,79 +1240,29 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy produktów pokazuje produkty w tabeli.
-
-Na liście produktów są wyświetlane:
+Funkcje:
 
 ```txt
-- ID,
-- nazwa produktu,
-- kategoria,
-- cena,
-- stan magazynowy,
-- akcesoria,
-- przyciski akcji.
+- wyświetlanie produktów,
+- wyszukiwanie produktów,
+- dodawanie produktów,
+- edycja produktów,
+- dezaktywacja produktów,
+- przypisywanie kategorii,
+- przypisywanie akcesoriów.
 ```
 
-Widok dodawania produktu zawiera pola:
-
-```txt
-Name
-Description
-Price
-Stock
-CategoryId
-ImageUrl
-Accessories[]
-```
-
-Widok edycji produktu pozwala zmienić dane produktu oraz jego akcesoria.
-
-Akcesoria produktu są wybierane przez checkboxy:
-
-```txt
-Accessories[]
-```
-
-Dzięki temu można przypisać do produktu wiele akcesoriów.
-
----
-
-## 28. CRUD produktów
-
-Dla produktów przygotowano widoki potrzebne do operacji CRUD.
-
-Wyświetlanie produktów:
+Adresy:
 
 ```txt
 /products
-```
-
-Dodawanie produktu:
-
-```txt
 /products/create
-```
-
-Edycja produktu:
-
-```txt
 /products/edit/{id}
 ```
 
-Dezaktywacja produktu:
-
-```txt
-/products/delete/{id}
-```
-
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
-
-Dodawanie i edycja produktów używa formularzy POST oraz PUT.
-
 ---
 
-## 29. Widoki kategorii
+## 31. Widoki kategorii
 
 Widoki kategorii znajdują się w katalogu:
 
@@ -1191,63 +1278,27 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy kategorii pokazuje kategorie w tabeli.
-
-Na liście kategorii są wyświetlane:
+Funkcje:
 
 ```txt
-- ID,
-- nazwa kategorii,
-- opis kategorii,
-- przyciski akcji.
+- wyświetlanie kategorii,
+- wyszukiwanie kategorii,
+- dodawanie kategorii,
+- edycja kategorii,
+- dezaktywacja kategorii.
 ```
 
-Widok dodawania kategorii zawiera pola:
-
-```txt
-Name
-Description
-```
-
-Widok edycji kategorii zawiera formularz edycji istniejącej kategorii.
-
----
-
-## 30. CRUD kategorii
-
-Dla kategorii przygotowano widoki potrzebne do operacji CRUD.
-
-Wyświetlanie kategorii:
+Adresy:
 
 ```txt
 /categories
-```
-
-Dodawanie kategorii:
-
-```txt
 /categories/create
-```
-
-Edycja kategorii:
-
-```txt
 /categories/edit/{id}
 ```
 
-Dezaktywacja kategorii:
-
-```txt
-/categories/delete/{id}
-```
-
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
-
-Dodawanie kategorii używa formularza POST, a edycja kategorii używa formularza PUT.
-
 ---
 
-## 31. Widoki akcesoriów
+## 32. Widoki akcesoriów
 
 Widoki akcesoriów znajdują się w katalogu:
 
@@ -1263,61 +1314,23 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy akcesoriów pokazuje akcesoria w tabeli.
-
-Na liście akcesoriów są wyświetlane:
+Funkcje:
 
 ```txt
-- ID,
-- nazwa akcesorium,
-- opis akcesorium,
-- cena,
-- przyciski akcji.
+- wyświetlanie akcesoriów,
+- wyszukiwanie akcesoriów,
+- dodawanie akcesoriów,
+- edycja akcesoriów,
+- dezaktywacja akcesoriów.
 ```
 
-Widok dodawania akcesorium zawiera pola:
-
-```txt
-Name
-Description
-Price
-```
-
-Widok edycji akcesorium zawiera formularz edycji istniejącego akcesorium.
-
----
-
-## 32. CRUD akcesoriów
-
-Dla akcesoriów przygotowano widoki potrzebne do operacji CRUD.
-
-Wyświetlanie akcesoriów:
+Adresy:
 
 ```txt
 /accessories
-```
-
-Dodawanie akcesorium:
-
-```txt
 /accessories/create
-```
-
-Edycja akcesorium:
-
-```txt
 /accessories/edit/{id}
 ```
-
-Dezaktywacja akcesorium:
-
-```txt
-/accessories/delete/{id}
-```
-
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
-
-Dodawanie akcesorium używa formularza POST, a edycja akcesorium używa formularza PUT.
 
 ---
 
@@ -1337,14 +1350,13 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy użytkowników pokazuje użytkowników w tabeli.
-
-Na liście użytkowników są wyświetlane:
+Widok listy użytkowników pokazuje:
 
 ```txt
 - ID,
-- nazwa użytkownika,
+- nazwę użytkownika,
 - login,
+- rolę,
 - przyciski akcji.
 ```
 
@@ -1356,59 +1368,31 @@ Widok dodawania użytkownika zawiera pola:
 Name
 Email
 Password
+Role
 ```
-
-W tym projekcie pole `Email` pełni funkcję loginu.
 
 Widok edycji użytkownika pozwala zmienić:
 
 ```txt
 - nazwę użytkownika,
 - login,
+- rolę,
 - hasło.
 ```
 
 Pole hasła w edycji można zostawić puste, wtedy hasło nie zostanie zmienione.
 
----
-
-## 34. CRUD użytkowników
-
-Dla użytkowników przygotowano widoki potrzebne do operacji CRUD.
-
-Wyświetlanie użytkowników:
+Adresy:
 
 ```txt
 /users
-```
-
-Dodawanie użytkownika:
-
-```txt
 /users/create
-```
-
-Edycja użytkownika:
-
-```txt
 /users/edit/{id}
 ```
 
-Dezaktywacja użytkownika:
-
-```txt
-/users/delete/{id}
-```
-
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
-
-Dodawanie użytkownika używa formularza POST, a edycja użytkownika używa formularza PUT.
-
-Hasło jest zapisywane w bazie jako hash.
-
 ---
 
-## 35. Widoki zamówień
+## 34. Widoki zamówień
 
 Widoki zamówień znajdują się w katalogu:
 
@@ -1423,17 +1407,15 @@ index.blade.php
 edit.blade.php
 ```
 
-Widok listy zamówień pokazuje zamówienia razem z danymi klienta i pozycjami zamówienia.
-
-Na liście zamówień są wyświetlane:
+Widok listy zamówień pokazuje:
 
 ```txt
 - ID zamówienia,
 - status zamówienia,
 - dane klienta,
 - adres,
-- użytkownik z systemu,
-- data utworzenia,
+- użytkownika z systemu,
+- datę utworzenia,
 - wartość zamówienia,
 - pozycje zamówienia,
 - przyciski akcji.
@@ -1441,7 +1423,7 @@ Na liście zamówień są wyświetlane:
 
 Widok edycji zamówienia pozwala zmienić status zamówienia.
 
-Dostępne statusy:
+Statusy techniczne zapisane w bazie:
 
 ```txt
 New
@@ -1450,43 +1432,25 @@ Sent
 Finished
 ```
 
----
+Statusy wyświetlane użytkownikowi po polsku:
 
-## 36. Obsługa zamówień
+```txt
+Nowe
+Opłacone
+Wysłane
+Zakończone
+```
 
-Zamówienia można wyświetlić pod adresem:
+Adresy:
 
 ```txt
 /orders
-```
-
-Edycja statusu zamówienia:
-
-```txt
 /orders/edit/{id}
 ```
 
-Dezaktywacja zamówienia:
-
-```txt
-/orders/delete/{id}
-```
-
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
-
-Edycja statusu zamówienia używa formularza PUT.
-
-Wyszukiwanie zamówień działa przez query params:
-
-```txt
-/orders?search=Jan
-```
-
-Wyszukiwanie jest wykonywane po nazwie klienta.
-
 ---
 
-## 37. Widoki pozycji zamówień
+## 35. Widoki pozycji zamówień
 
 Widoki pozycji zamówień znajdują się w katalogu:
 
@@ -1502,36 +1466,20 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy pozycji zamówień:
-
-```txt
-resources/views/orderItems/index.blade.php
-```
-
-Ten widok pokazuje pozycje zamówień w tabeli.
-
-Na liście pozycji zamówień są wyświetlane:
+Widok listy pozycji zamówień pokazuje:
 
 ```txt
 - ID pozycji,
 - numer zamówienia,
-- klient,
+- klienta,
 - produkt,
 - ilość,
-- cena,
-- suma,
+- cenę,
+- sumę,
 - przyciski akcji.
 ```
 
-Widok dodawania pozycji zamówienia:
-
-```txt
-resources/views/orderItems/create.blade.php
-```
-
-Ten widok zawiera formularz dodania pozycji do zamówienia.
-
-W formularzu dodawania pozycji zamówienia są pola:
+Widok dodawania pozycji zamówienia zawiera pola:
 
 ```txt
 OrderId
@@ -1539,318 +1487,82 @@ ProductId
 Quantity
 ```
 
-Widok edycji pozycji zamówienia:
+Widok edycji pozycji zamówienia pozwala zmienić:
 
 ```txt
-resources/views/orderItems/edit.blade.php
+- zamówienie,
+- produkt,
+- ilość.
 ```
 
-Ten widok pozwala zmienić zamówienie, produkt oraz ilość.
+Po zmianie pozycji zamówienia wartość całego zamówienia jest automatycznie przeliczana.
 
----
-
-## 38. CRUD pozycji zamówień
-
-Dla pozycji zamówień przygotowano widoki potrzebne do operacji CRUD.
-
-Wyświetlanie pozycji zamówień:
+Adresy:
 
 ```txt
 /order-items
-```
-
-Dodawanie pozycji zamówienia:
-
-```txt
 /order-items/create
-```
-
-Edycja pozycji zamówienia:
-
-```txt
 /order-items/edit/{id}
 ```
 
-Dezaktywacja pozycji zamówienia:
+---
+
+## 36. Query params, URL params i POST
+
+Przykład query params:
 
 ```txt
-/order-items/delete/{id}
+/products?search=bambu
 ```
 
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
+W kodzie pobierane przez:
 
-Dodawanie pozycji zamówienia używa formularza POST.
+```php
+$request->query('search')
+```
 
-Edycja pozycji zamówienia używa formularza PUT.
-
-Wyszukiwanie pozycji zamówień działa przez query params:
+Przykład URL params:
 
 ```txt
-/order-items?search=ender
+/products/edit/1
 ```
 
-Wyszukiwanie jest wykonywane po nazwie produktu.
+W trasie:
+
+```php
+Route::get('/products/edit/{id}', [ProductController::class, 'edit'])->name('products.edit');
+```
+
+W metodzie kontrolera:
+
+```php
+public function edit(Request $request, int $id)
+```
+
+Przykład POST:
+
+```php
+Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
+```
+
+Dane z formularza:
+
+```php
+$request->input('Name')
+```
+
+W projekcie używane są metody:
+
+```txt
+GET
+POST
+PUT
+DELETE
+```
 
 ---
 
-## 39. Dziennik pracy
-
-### Krok 1 - utworzenie projektu Laravel
-
-Utworzyłem nowy projekt Laravel w katalogu:
-
-```txt
-C:\git\PZSI2026Laravel
-```
-
-Projekt uruchamiam komendą:
-
-```bash
-php artisan serve
-```
-
-Adres lokalny aplikacji:
-
-```txt
-http://127.0.0.1:8000
-```
-
-### Krok 2 - przygotowanie projektu
-
-Przygotowałem czysty projekt Laravel do dalszej pracy.
-
-### Krok 3 - baza danych
-
-Przygotowałem bazę danych dla projektu sklepu z drukarkami 3D.
-
-Nazwa bazy danych:
-
-```txt
-pzsi-druk-3d
-```
-
-Skrypt SQL znajduje się w pliku:
-
-```txt
-database/pzsi-druk-3d.sql
-```
-
-W bazie utworzyłem tabele:
-
-```txt
-Users
-Categories
-Products
-Accessories
-ProductAccessories
-Orders
-OrderItems
-```
-
-Zastosowałem klucze obce między tabelami oraz relację wiele-do-wielu między produktami i akcesoriami.
-
-### Krok 4 - modele Laravel
-
-Dodałem modele Laravel dla tabel z bazy danych.
-
-Modele znajdują się w folderze:
-
-```txt
-app/Models
-```
-
-Utworzone modele:
-
-```txt
-User
-Category
-Product
-Accessory
-Order
-OrderItem
-```
-
-W modelach ustawiłem nazwy tabel, klucze główne, pola dat oraz relacje.
-
-### Krok 5 - serwisy Laravel
-
-Dodałem serwisy Laravel, które odpowiadają za logikę biznesową aplikacji.
-
-Serwisy znajdują się w katalogu:
-
-```txt
-app/Services
-```
-
-Utworzone serwisy:
-
-```txt
-ProductService
-CategoryService
-AccessoryService
-UserService
-AuthService
-OrderService
-OrderItemService
-```
-
-### Krok 6 - kontrolery Laravel
-
-Dodałem kontrolery Laravel, które łączą trasy aplikacji z serwisami.
-
-Kontrolery znajdują się w katalogu:
-
-```txt
-app/Http/Controllers
-```
-
-Utworzone kontrolery:
-
-```txt
-ShopController
-ProductController
-CategoryController
-AccessoryController
-UserController
-AuthController
-CartController
-OrderController
-OrderItemController
-```
-
-### Krok 7 - trasy aplikacji
-
-Dodałem trasy aplikacji w pliku:
-
-```txt
-routes/web.php
-```
-
-Trasy łączą adresy URL z kontrolerami.
-
-Dodałem trasy dla strony głównej, logowania, rejestracji, produktów, kategorii, akcesoriów, użytkowników, koszyka, zamówień i pozycji zamówień.
-
-### Krok 8 - layout i strona główna sklepu
-
-Dodałem główny layout Blade:
-
-```txt
-resources/views/main.blade.php
-```
-
-Dodałem też widok strony głównej sklepu:
-
-```txt
-resources/views/shop/index.blade.php
-```
-
-### Krok 9 - logowanie, rejestracja i koszyk
-
-Dodałem widoki logowania i rejestracji:
-
-```txt
-resources/views/auth/login.blade.php
-resources/views/auth/register.blade.php
-```
-
-Dodałem też widok koszyka:
-
-```txt
-resources/views/cart/index.blade.php
-```
-
-### Krok 10 - poprawa widoku logowania
-
-Poprawiłem widok logowania:
-
-```txt
-resources/views/auth/login.blade.php
-```
-
-Usunąłem z widoku logowania wyświetlanie danych testowych.
-
-### Krok 11 - widoki produktów
-
-Dodałem widoki CRUD dla produktów:
-
-```txt
-resources/views/products/index.blade.php
-resources/views/products/create.blade.php
-resources/views/products/edit.blade.php
-```
-
-Na tym etapie działa część CRUD dla produktów.
-
-### Krok 12 - widoki kategorii
-
-Dodałem widoki CRUD dla kategorii:
-
-```txt
-resources/views/categories/index.blade.php
-resources/views/categories/create.blade.php
-resources/views/categories/edit.blade.php
-```
-
-Na tym etapie działa część CRUD dla kategorii.
-
-### Krok 13 - widoki akcesoriów
-
-Dodałem widoki CRUD dla akcesoriów:
-
-```txt
-resources/views/accessories/index.blade.php
-resources/views/accessories/create.blade.php
-resources/views/accessories/edit.blade.php
-```
-
-Na tym etapie działa część CRUD dla akcesoriów.
-
-### Krok 14 - widoki użytkowników
-
-Dodałem widoki CRUD dla użytkowników:
-
-```txt
-resources/views/users/index.blade.php
-resources/views/users/create.blade.php
-resources/views/users/edit.blade.php
-```
-
-Widok listy użytkowników pokazuje użytkowników w tabeli i nie pokazuje haseł.
-
-### Krok 15 - widoki zamówień
-
-Dodałem widoki zamówień:
-
-```txt
-resources/views/orders/index.blade.php
-resources/views/orders/edit.blade.php
-```
-
-Widok listy zamówień pokazuje dane zamówienia, dane klienta i pozycje zamówienia.
-
-Widok edycji zamówienia pozwala zmienić status zamówienia.
-
-### Krok 16 - widoki pozycji zamówień
-
-Dodałem widoki CRUD dla pozycji zamówień:
-
-```txt
-resources/views/orderItems/index.blade.php
-resources/views/orderItems/create.blade.php
-resources/views/orderItems/edit.blade.php
-```
-
-Widok listy pozycji zamówień pokazuje numer zamówienia, klienta, produkt, ilość, cenę i sumę.
-
-Widok dodawania pozycji zamówienia pozwala wybrać zamówienie, produkt i ilość.
-
-Widok edycji pozycji zamówienia pozwala zmienić zamówienie, produkt i ilość.
-
-Na tym etapie przygotowane są już widoki dla wszystkich głównych tabel projektu.
-
----
-
-## 40. Jak wgrać bazę danych
+## 37. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1879,7 +1591,44 @@ pzsi-druk-3d
 
 ---
 
-## 41. Jak sprawdzić trasy
+## 38. Jak zaktualizować istniejącą bazę o role
+
+Jeżeli baza już istnieje i nie chcesz jej usuwać, należy wykonać w phpMyAdmin:
+
+```sql
+ALTER TABLE Users
+ADD Role VARCHAR(20) NOT NULL DEFAULT 'client' AFTER Password;
+
+UPDATE Users
+SET Role = 'admin'
+WHERE Email = 'tsaran';
+```
+
+Jeżeli kolumna `Role` już istnieje, tego polecenia `ALTER TABLE` nie trzeba wykonywać drugi raz.
+
+---
+
+## 39. Jak naprawić istniejące wartości zamówień
+
+Jeżeli wcześniej były edytowane pozycje zamówienia i suma zamówienia się nie zgadzała, można wykonać SQL:
+
+```sql
+UPDATE Orders o
+SET TotalPrice = (
+    SELECT IFNULL(SUM(oi.Price * oi.Quantity), 0)
+    FROM OrderItems oi
+    WHERE oi.OrderId = o.Id
+    AND oi.IsActive = 1
+),
+EditDateTime = NOW()
+WHERE o.IsActive = 1;
+```
+
+To przeliczy wartość zamówień na podstawie aktywnych pozycji zamówienia.
+
+---
+
+## 40. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1893,18 +1642,18 @@ Powinny pojawić się między innymi trasy:
 /
 login
 register
+cart
 products
 categories
 accessories
 users
-cart
 orders
 order-items
 ```
 
 ---
 
-## 42. Jak uruchomić projekt
+## 41. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1924,6 +1673,18 @@ Wyczyścić konfigurację:
 php artisan config:clear
 ```
 
+Wyczyścić trasy:
+
+```bash
+php artisan route:clear
+```
+
+Wyczyścić widoki:
+
+```bash
+php artisan view:clear
+```
+
 Uruchomić projekt:
 
 ```bash
@@ -1936,31 +1697,243 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie aplikacja ma już przygotowane główne modele, serwisy, kontrolery, trasy i widoki CRUD.
+---
+
+## 42. Test działania ról
+
+Test bez logowania:
+
+```txt
+/products
+```
+
+Oczekiwany efekt:
+
+```txt
+przekierowanie na stronę logowania
+```
+
+Test po zalogowaniu jako klient:
+
+```txt
+/products
+```
+
+Oczekiwany efekt:
+
+```txt
+brak dostępu do panelu administracyjnego
+```
+
+Test po zalogowaniu jako administrator:
+
+```txt
+/products
+/categories
+/accessories
+/users
+/orders
+/order-items
+```
+
+Oczekiwany efekt:
+
+```txt
+administrator ma dostęp do panelu administracyjnego
+```
 
 ---
 
-## 43. Następny krok
+## 43. Dziennik pracy
 
-Następnie trzeba wykonać test całej aplikacji i poprawić ewentualne błędy.
+### Krok 1 - utworzenie projektu Laravel
 
-Do sprawdzenia będą:
+Utworzono nowy projekt Laravel w katalogu:
 
 ```txt
-- strona główna sklepu,
-- logowanie,
-- rejestracja,
-- koszyk,
-- składanie zamówienia,
-- lista zamówień,
-- CRUD produktów,
-- CRUD kategorii,
-- CRUD akcesoriów,
-- CRUD użytkowników,
-- CRUD pozycji zamówień,
-- wyszukiwanie na listach,
-- walidacja formularzy,
-- dezaktywacja rekordów.
+C:\git\PZSI2026Laravel
 ```
 
-Po testach można dodać ostatnie poprawki i przygotować opis projektu do obrony.
+### Krok 2 - przygotowanie projektu
+
+Przygotowano czysty projekt Laravel do dalszej pracy.
+
+### Krok 3 - baza danych
+
+Przygotowano bazę danych dla sklepu z drukarkami 3D.
+
+Dodano tabele:
+
+```txt
+Users
+Categories
+Products
+Accessories
+ProductAccessories
+Orders
+OrderItems
+```
+
+### Krok 4 - modele Laravel
+
+Dodano modele Laravel:
+
+```txt
+User
+Category
+Product
+Accessory
+Order
+OrderItem
+```
+
+Dodano relacje między modelami.
+
+### Krok 5 - serwisy Laravel
+
+Dodano serwisy:
+
+```txt
+ProductService
+CategoryService
+AccessoryService
+UserService
+AuthService
+OrderService
+OrderItemService
+```
+
+### Krok 6 - kontrolery Laravel
+
+Dodano kontrolery:
+
+```txt
+ShopController
+ProductController
+CategoryController
+AccessoryController
+UserController
+AuthController
+CartController
+OrderController
+OrderItemController
+```
+
+### Krok 7 - trasy aplikacji
+
+Dodano trasy aplikacji w pliku:
+
+```txt
+routes/web.php
+```
+
+### Krok 8 - layout i strona główna sklepu
+
+Dodano główny layout Blade:
+
+```txt
+resources/views/main.blade.php
+```
+
+Dodano widok strony głównej sklepu:
+
+```txt
+resources/views/shop/index.blade.php
+```
+
+### Krok 9 - logowanie, rejestracja i koszyk
+
+Dodano widoki:
+
+```txt
+resources/views/auth/login.blade.php
+resources/views/auth/register.blade.php
+resources/views/cart/index.blade.php
+```
+
+### Krok 10 - poprawa widoku logowania
+
+Usunięto wyświetlanie danych testowych z widoku logowania.
+
+### Krok 11 - widoki produktów
+
+Dodano widoki CRUD dla produktów:
+
+```txt
+resources/views/products/index.blade.php
+resources/views/products/create.blade.php
+resources/views/products/edit.blade.php
+```
+
+### Krok 12 - widoki kategorii
+
+Dodano widoki CRUD dla kategorii:
+
+```txt
+resources/views/categories/index.blade.php
+resources/views/categories/create.blade.php
+resources/views/categories/edit.blade.php
+```
+
+### Krok 13 - widoki akcesoriów
+
+Dodano widoki CRUD dla akcesoriów:
+
+```txt
+resources/views/accessories/index.blade.php
+resources/views/accessories/create.blade.php
+resources/views/accessories/edit.blade.php
+```
+
+### Krok 14 - widoki użytkowników
+
+Dodano widoki CRUD dla użytkowników:
+
+```txt
+resources/views/users/index.blade.php
+resources/views/users/create.blade.php
+resources/views/users/edit.blade.php
+```
+
+### Krok 15 - widoki zamówień
+
+Dodano widoki zamówień:
+
+```txt
+resources/views/orders/index.blade.php
+resources/views/orders/edit.blade.php
+```
+
+Dodano polskie etykiety statusów zamówień.
+
+### Krok 16 - widoki pozycji zamówień
+
+Dodano widoki CRUD dla pozycji zamówień:
+
+```txt
+resources/views/orderItems/index.blade.php
+resources/views/orderItems/create.blade.php
+resources/views/orderItems/edit.blade.php
+```
+
+### Krok 17 - poprawa wartości zamówienia
+
+Dodano automatyczne przeliczanie wartości zamówienia po zmianie pozycji zamówienia.
+
+### Krok 18 - role i zabezpieczenie panelu
+
+Dodano role użytkowników:
+
+```txt
+admin
+client
+```
+
+Dodano middleware:
+
+```txt
+CheckUserLogged
+CheckAdmin
+```
+
+Panel administracyjny zabezpieczono tak, aby dostęp miał tylko administrator.
