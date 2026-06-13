@@ -114,6 +114,7 @@ Aktualnie wykonano:
 22. Utworzenie widoków CRUD dla kategorii.
 23. Utworzenie widoków CRUD dla akcesoriów.
 24. Utworzenie widoków CRUD dla użytkowników.
+25. Utworzenie widoków dla zamówień.
 ```
 
 ---
@@ -703,7 +704,7 @@ W serwisie `OrderService` dodana jest metoda:
 createFromCart()
 ```
 
-Metoda ta będzie tworzyć zamówienie na podstawie produktów zapisanych w koszyku.
+Metoda ta tworzy zamówienie na podstawie produktów zapisanych w koszyku.
 
 Najpierw pobierany jest koszyk z sesji:
 
@@ -896,7 +897,7 @@ Przykład POST:
 Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
 ```
 
-Dane z formularza będą później odbierane przez:
+Dane z formularza są odbierane przez:
 
 ```php
 $request->input('Name')
@@ -1244,14 +1245,7 @@ Dezaktywacja kategorii:
 /categories/delete/{id}
 ```
 
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
-
-```blade
-<form method="POST" action="{{ route('categories.delete', $category->Id) }}">
-    @csrf
-    @method('DELETE')
-</form>
-```
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
 
 Dodawanie kategorii używa formularza POST, a edycja kategorii używa formularza PUT.
 
@@ -1347,13 +1341,7 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy użytkowników:
-
-```txt
-resources/views/users/index.blade.php
-```
-
-Ten widok pokazuje użytkowników w tabeli.
+Widok listy użytkowników pokazuje użytkowników w tabeli.
 
 Na liście użytkowników są wyświetlane:
 
@@ -1366,15 +1354,7 @@ Na liście użytkowników są wyświetlane:
 
 Hasło użytkownika nie jest wyświetlane na liście.
 
-Widok dodawania użytkownika:
-
-```txt
-resources/views/users/create.blade.php
-```
-
-Ten widok zawiera formularz dodania nowego użytkownika.
-
-W formularzu dodawania użytkownika są pola:
+Widok dodawania użytkownika zawiera pola:
 
 ```txt
 Name
@@ -1384,15 +1364,7 @@ Password
 
 W tym projekcie pole `Email` pełni funkcję loginu.
 
-Widok edycji użytkownika:
-
-```txt
-resources/views/users/edit.blade.php
-```
-
-Ten widok zawiera formularz edycji użytkownika.
-
-W edycji można zmienić:
+Widok edycji użytkownika pozwala zmienić:
 
 ```txt
 - nazwę użytkownika,
@@ -1432,31 +1404,112 @@ Dezaktywacja użytkownika:
 /users/delete/{id}
 ```
 
-Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
 
-```blade
-<form method="POST" action="{{ route('users.delete', $user->Id) }}">
-    @csrf
-    @method('DELETE')
-</form>
-```
-
-Dodawanie użytkownika używa formularza POST.
-
-Edycja użytkownika używa formularza PUT:
-
-```blade
-<form method="POST" action="{{ route('users.update', $user->Id) }}">
-    @csrf
-    @method('PUT')
-</form>
-```
+Dodawanie użytkownika używa formularza POST, a edycja użytkownika używa formularza PUT.
 
 Hasło jest zapisywane w bazie jako hash.
 
 ---
 
-## 35. Dziennik pracy
+## 35. Widoki zamówień
+
+Widoki zamówień znajdują się w katalogu:
+
+```txt
+resources/views/orders
+```
+
+Utworzone pliki:
+
+```txt
+index.blade.php
+edit.blade.php
+```
+
+Widok listy zamówień:
+
+```txt
+resources/views/orders/index.blade.php
+```
+
+Ten widok pokazuje zamówienia razem z danymi klienta i pozycjami zamówienia.
+
+Na liście zamówień są wyświetlane:
+
+```txt
+- ID zamówienia,
+- status zamówienia,
+- dane klienta,
+- adres,
+- użytkownik z systemu,
+- data utworzenia,
+- wartość zamówienia,
+- pozycje zamówienia,
+- przyciski akcji.
+```
+
+Widok edycji zamówienia:
+
+```txt
+resources/views/orders/edit.blade.php
+```
+
+Ten widok pozwala zmienić status zamówienia.
+
+Dostępne statusy:
+
+```txt
+New
+Paid
+Sent
+Finished
+```
+
+---
+
+## 36. Obsługa zamówień
+
+Zamówienia można wyświetlić pod adresem:
+
+```txt
+/orders
+```
+
+Edycja statusu zamówienia:
+
+```txt
+/orders/edit/{id}
+```
+
+Dezaktywacja zamówienia:
+
+```txt
+/orders/delete/{id}
+```
+
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
+
+Edycja statusu zamówienia używa formularza PUT:
+
+```blade
+<form method="POST" action="{{ route('orders.update', $order->Id) }}">
+    @csrf
+    @method('PUT')
+</form>
+```
+
+Wyszukiwanie zamówień działa przez query params:
+
+```txt
+/orders?search=Jan
+```
+
+Wyszukiwanie jest wykonywane po nazwie klienta.
+
+---
+
+## 37. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1680,15 +1733,24 @@ resources/views/users/edit.blade.php
 
 Widok listy użytkowników pokazuje użytkowników w tabeli i nie pokazuje haseł.
 
-Widok dodawania użytkownika pozwala utworzyć nowego użytkownika.
+### Krok 15 - widoki zamówień
 
-Widok edycji użytkownika pozwala zmienić nazwę, login oraz opcjonalnie hasło.
+Dodałem widoki zamówień:
 
-Na tym etapie działa część CRUD dla użytkowników.
+```txt
+resources/views/orders/index.blade.php
+resources/views/orders/edit.blade.php
+```
+
+Widok listy zamówień pokazuje dane zamówienia, dane klienta i pozycje zamówienia.
+
+Widok edycji zamówienia pozwala zmienić status zamówienia.
+
+Na tym etapie działa obsługa wyświetlania zamówień, edycji statusu i dezaktywacji zamówienia.
 
 ---
 
-## 36. Jak wgrać bazę danych
+## 38. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1717,7 +1779,7 @@ pzsi-druk-3d
 
 ---
 
-## 37. Jak sprawdzić trasy
+## 39. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1742,7 +1804,7 @@ order-items
 
 ---
 
-## 38. Jak uruchomić projekt
+## 40. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1774,25 +1836,26 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w zamówienia i pozycje zamówień, ponieważ te widoki będą dodane w kolejnych krokach.
+Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w pozycje zamówień, ponieważ te widoki będą dodane w kolejnym kroku.
 
 ---
 
-## 39. Następny krok
+## 41. Następny krok
 
-Następnie zostaną przygotowane widoki dla zamówień.
+Następnie zostaną przygotowane widoki dla pozycji zamówień.
 
 Widoki będą znajdować się w katalogu:
 
 ```txt
-resources/views/orders
+resources/views/orderItems
 ```
 
 Planowane pliki:
 
 ```txt
 index.blade.php
+create.blade.php
 edit.blade.php
 ```
 
-Po dodaniu tych widoków będzie można wyświetlać zamówienia, edytować status zamówienia i dezaktywować zamówienia.
+Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować pozycje zamówień.
