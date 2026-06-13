@@ -110,6 +110,7 @@ Aktualnie wykonano:
 18. Utworzenie widoków logowania i rejestracji.
 19. Utworzenie widoku koszyka.
 20. Poprawienie widoku logowania tak, aby nie wyświetlał danych testowych.
+21. Utworzenie widoków CRUD dla produktów.
 ```
 
 ---
@@ -1079,7 +1080,131 @@ Address
 
 ---
 
-## 27. Dziennik pracy
+## 27. Widoki produktów
+
+Widoki produktów znajdują się w katalogu:
+
+```txt
+resources/views/products
+```
+
+Utworzone pliki:
+
+```txt
+index.blade.php
+create.blade.php
+edit.blade.php
+```
+
+Widok listy produktów:
+
+```txt
+resources/views/products/index.blade.php
+```
+
+Ten widok pokazuje produkty w tabeli.
+
+Na liście produktów są wyświetlane:
+
+```txt
+- ID,
+- nazwa produktu,
+- kategoria,
+- cena,
+- stan magazynowy,
+- akcesoria,
+- przyciski akcji.
+```
+
+Widok dodawania produktu:
+
+```txt
+resources/views/products/create.blade.php
+```
+
+Ten widok zawiera formularz dodania nowego produktu.
+
+W formularzu dodawania produktu są pola:
+
+```txt
+Name
+Description
+Price
+Stock
+CategoryId
+ImageUrl
+Accessories[]
+```
+
+Widok edycji produktu:
+
+```txt
+resources/views/products/edit.blade.php
+```
+
+Ten widok zawiera formularz edycji istniejącego produktu.
+
+Akcesoria produktu są wybierane przez checkboxy:
+
+```txt
+Accessories[]
+```
+
+Dzięki temu można przypisać do produktu wiele akcesoriów.
+
+---
+
+## 28. CRUD produktów
+
+Dla produktów przygotowano widoki potrzebne do operacji CRUD.
+
+Wyświetlanie produktów:
+
+```txt
+/products
+```
+
+Dodawanie produktu:
+
+```txt
+/products/create
+```
+
+Edycja produktu:
+
+```txt
+/products/edit/{id}
+```
+
+Dezaktywacja produktu:
+
+```txt
+/products/delete/{id}
+```
+
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
+
+```blade
+<form method="POST" action="{{ route('products.delete', $product->Id) }}">
+    @csrf
+    @method('DELETE')
+</form>
+```
+
+Dodawanie i edycja produktów używa formularzy POST oraz PUT.
+
+Przykład PUT przy edycji:
+
+```blade
+<form method="POST" action="{{ route('products.update', $product->Id) }}">
+    @csrf
+    @method('PUT')
+</form>
+```
+
+---
+
+## 29. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1394,9 +1519,27 @@ Hasło
 
 Dzięki temu formularz logowania wygląda bardziej neutralnie i nie pokazuje przykładowych danych użytkownikowi.
 
+### Krok 11 - widoki produktów
+
+Dodałem widoki CRUD dla produktów:
+
+```txt
+resources/views/products/index.blade.php
+resources/views/products/create.blade.php
+resources/views/products/edit.blade.php
+```
+
+Widok listy produktów pokazuje produkty w tabeli oraz pozwala je wyszukiwać.
+
+Widok dodawania produktu pozwala dodać nowy produkt, wybrać kategorię i przypisać akcesoria.
+
+Widok edycji produktu pozwala zmienić dane produktu oraz jego akcesoria.
+
+Na tym etapie działa już część CRUD dla produktów.
+
 ---
 
-## 28. Jak wgrać bazę danych
+## 30. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1425,7 +1568,7 @@ pzsi-druk-3d
 
 ---
 
-## 29. Jak sprawdzić trasy
+## 31. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1450,7 +1593,7 @@ order-items
 
 ---
 
-## 30. Jak uruchomić projekt
+## 32. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1482,18 +1625,18 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki produktów, kategorii, akcesoriów, zamówień i użytkowników będą dodane w kolejnych krokach.
+Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki kategorii, akcesoriów, zamówień i użytkowników będą dodane w kolejnych krokach.
 
 ---
 
-## 31. Następny krok
+## 33. Następny krok
 
-Następnie zostaną przygotowane widoki CRUD dla produktów.
+Następnie zostaną przygotowane widoki CRUD dla kategorii.
 
 Widoki będą znajdować się w katalogu:
 
 ```txt
-resources/views/products
+resources/views/categories
 ```
 
 Planowane pliki:
@@ -1504,4 +1647,4 @@ create.blade.php
 edit.blade.php
 ```
 
-Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować produkty.
+Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować kategorie.
