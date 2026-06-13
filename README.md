@@ -105,6 +105,11 @@ Aktualnie wykonano:
 13. Utworzenie kontrolerów Laravel.
 14. Połączenie kontrolerów z serwisami.
 15. Przygotowanie tras aplikacji w pliku routes/web.php.
+16. Utworzenie głównego layoutu Blade.
+17. Utworzenie widoku strony głównej sklepu.
+18. Utworzenie widoków logowania i rejestracji.
+19. Utworzenie widoku koszyka.
+20. Poprawienie widoku logowania tak, aby nie wyświetlał danych testowych.
 ```
 
 ---
@@ -130,7 +135,7 @@ Opis wybranych katalogów:
 app/Models              - tutaj są modele
 app/Http/Controllers    - tutaj są kontrolery
 app/Services            - tutaj są serwisy z logiką biznesową
-resources/views         - tutaj będą widoki Blade
+resources/views         - tutaj są widoki Blade
 routes/web.php          - tutaj są trasy strony
 database                - tutaj jest plik SQL bazy danych
 ```
@@ -289,12 +294,7 @@ Dodałem też dane testowe, żeby od razu było co wyświetlać w aplikacji.
 
 ## 9. Użytkownik testowy
 
-W bazie jest dodany użytkownik testowy:
-
-```txt
-Login: tsaran
-Hasło: dalej
-```
+W bazie jest dodany użytkownik testowy.
 
 W tabeli `Users` login jest zapisany w kolumnie:
 
@@ -302,22 +302,24 @@ W tabeli `Users` login jest zapisany w kolumnie:
 Email
 ```
 
-Czyli w bazie wygląda to tak:
+Czyli w bazie użytkownik ma uzupełnione między innymi pola:
 
 ```txt
-Name: tsaran
-Email: tsaran
-Password: zahashowane hasło
+Name
+Email
+Password
 ```
 
 Hasło nie jest zapisane zwykłym tekstem.
-W SQL jest zapisany hash hasła `dalej`.
+W SQL jest zapisany hash hasła.
 
 W kodzie logowania hasło będzie sprawdzane przez:
 
 ```php
 Hash::check()
 ```
+
+Dane testowe nie są wyświetlane na formularzu logowania.
 
 ---
 
@@ -898,7 +900,186 @@ $request->input('Name')
 
 ---
 
-## 23. Dziennik pracy
+## 23. Widoki Blade
+
+Widoki Blade znajdują się w katalogu:
+
+```txt
+resources/views
+```
+
+Główny layout strony znajduje się w pliku:
+
+```txt
+resources/views/main.blade.php
+```
+
+Layout zawiera wspólne elementy strony:
+
+```txt
+- nagłówek HTML,
+- Bootstrap,
+- menu nawigacyjne,
+- komunikaty sukcesu,
+- komunikaty błędów,
+- miejsce na treść strony.
+```
+
+Miejsce na treść strony jest oznaczone przez:
+
+```blade
+@yield('content')
+```
+
+Pozostałe widoki korzystają z layoutu przez:
+
+```blade
+@extends('main')
+```
+
+---
+
+## 24. Widok strony głównej sklepu
+
+Widok strony głównej sklepu znajduje się w pliku:
+
+```txt
+resources/views/shop/index.blade.php
+```
+
+Ten widok pokazuje produkty dostępne w sklepie.
+
+Na stronie głównej są wyświetlane:
+
+```txt
+- nazwa produktu,
+- opis produktu,
+- kategoria,
+- cena,
+- stan magazynowy,
+- powiązane akcesoria,
+- przycisk dodania produktu do koszyka.
+```
+
+Na stronie głównej jest też wyszukiwarka produktów.
+
+Przykład wyszukiwania:
+
+```txt
+/?search=bambu
+```
+
+Produkt dodawany jest do koszyka przez formularz POST:
+
+```blade
+<form method="POST" action="{{ route('cart.add', $product->Id) }}">
+    @csrf
+</form>
+```
+
+---
+
+## 25. Widoki logowania i rejestracji
+
+Widoki logowania i rejestracji znajdują się w folderze:
+
+```txt
+resources/views/auth
+```
+
+Utworzone pliki:
+
+```txt
+login.blade.php
+register.blade.php
+```
+
+Widok logowania korzysta z trasy:
+
+```php
+route('auth.login.post')
+```
+
+W formularzu logowania są pola:
+
+```txt
+Email
+Password
+```
+
+W projekcie pole `Email` działa jako login użytkownika.
+
+W widoku logowania nie są wyświetlane dane testowe.
+Pola formularza mają zwykłe placeholdery:
+
+```txt
+Login
+Hasło
+```
+
+Widok rejestracji korzysta z trasy:
+
+```php
+route('auth.register.post')
+```
+
+W formularzu rejestracji są pola:
+
+```txt
+Name
+Email
+Password
+```
+
+---
+
+## 26. Widok koszyka
+
+Widok koszyka znajduje się w pliku:
+
+```txt
+resources/views/cart/index.blade.php
+```
+
+Koszyk pokazuje:
+
+```txt
+- nazwę produktu,
+- cenę produktu,
+- ilość,
+- sumę dla produktu,
+- łączną wartość koszyka,
+- przycisk usunięcia produktu z koszyka,
+- formularz złożenia zamówienia.
+```
+
+Usunięcie produktu z koszyka jest wykonywane przez formularz POST:
+
+```blade
+<form method="POST" action="{{ route('cart.remove', $product->Id) }}">
+    @csrf
+</form>
+```
+
+Złożenie zamówienia jest wykonywane przez formularz POST:
+
+```blade
+<form method="POST" action="{{ route('cart.order') }}">
+    @csrf
+</form>
+```
+
+Dane zamówienia:
+
+```txt
+CustomerName
+CustomerEmail
+Address
+```
+
+---
+
+## 27. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -970,13 +1151,6 @@ Dodałem też przykładowe dane startowe:
 - produkty,
 - akcesoria,
 - powiązania produktów z akcesoriami.
-```
-
-Użytkownik testowy:
-
-```txt
-Login: tsaran
-Hasło: dalej
 ```
 
 ### Krok 4 - modele Laravel
@@ -1155,11 +1329,74 @@ PUT
 DELETE
 ```
 
-Dzięki temu projekt ma przygotowaną obsługę adresów URL. Następnym krokiem będzie dodanie widoków Blade.
+Dzięki temu projekt ma przygotowaną obsługę adresów URL.
+
+### Krok 8 - layout i strona główna sklepu
+
+Dodałem główny layout Blade:
+
+```txt
+resources/views/main.blade.php
+```
+
+Layout zawiera menu, Bootstrap oraz miejsce na treść strony.
+
+Dodałem też widok strony głównej sklepu:
+
+```txt
+resources/views/shop/index.blade.php
+```
+
+Na stronie głównej wyświetlam produkty z bazy danych oraz przycisk dodania produktu do koszyka.
+
+### Krok 9 - logowanie, rejestracja i koszyk
+
+Dodałem widoki logowania i rejestracji:
+
+```txt
+resources/views/auth/login.blade.php
+resources/views/auth/register.blade.php
+```
+
+Dodałem też widok koszyka:
+
+```txt
+resources/views/cart/index.blade.php
+```
+
+Widok koszyka pokazuje produkty zapisane w sesji oraz formularz złożenia zamówienia.
+
+Na tym etapie można już wejść na stronę główną, zalogować się, zarejestrować konto i przejść do koszyka.
+
+### Krok 10 - poprawa widoku logowania
+
+Poprawiłem widok logowania:
+
+```txt
+resources/views/auth/login.blade.php
+```
+
+Usunąłem z widoku logowania wyświetlanie danych testowych.
+
+Zmieniłem też placeholdery pól formularza.
+
+W polu loginu jest placeholder:
+
+```txt
+Login
+```
+
+W polu hasła jest placeholder:
+
+```txt
+Hasło
+```
+
+Dzięki temu formularz logowania wygląda bardziej neutralnie i nie pokazuje przykładowych danych użytkownikowi.
 
 ---
 
-## 24. Jak wgrać bazę danych
+## 28. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1188,7 +1425,7 @@ pzsi-druk-3d
 
 ---
 
-## 25. Jak sprawdzić trasy
+## 29. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1213,7 +1450,7 @@ order-items
 
 ---
 
-## 26. Jak uruchomić projekt
+## 30. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1245,39 +1482,26 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie po wejściu na część adresów może pojawić się błąd brakującego widoku, ponieważ widoki Blade zostaną dodane w następnym kroku.
+Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki produktów, kategorii, akcesoriów, zamówień i użytkowników będą dodane w kolejnych krokach.
 
 ---
 
-## 27. Następny krok
+## 31. Następny krok
 
-Następnie zostaną przygotowane widoki Blade.
+Następnie zostaną przygotowane widoki CRUD dla produktów.
 
 Widoki będą znajdować się w katalogu:
 
 ```txt
-resources/views
+resources/views/products
 ```
 
-Najpierw zostanie przygotowany główny layout:
+Planowane pliki:
 
 ```txt
-resources/views/main.blade.php
+index.blade.php
+create.blade.php
+edit.blade.php
 ```
 
-Następnie zostaną dodane widoki dla:
-
-```txt
-- strony głównej sklepu,
-- produktów,
-- kategorii,
-- akcesoriów,
-- logowania,
-- rejestracji,
-- koszyka,
-- zamówień,
-- użytkowników,
-- pozycji zamówień.
-```
-
-Po dodaniu widoków aplikacja zacznie wyświetlać normalne strony w przeglądarce.
+Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować produkty.
