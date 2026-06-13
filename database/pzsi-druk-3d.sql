@@ -94,9 +94,11 @@ CREATE TABLE OrderItems (
 );
 
 -- dane startowe, żebym miał co klikac w aplikacji
+-- login: tsaran
+-- hasło: dalej
 INSERT INTO Users (Name, Email, Password, CreationDateTime, EditDateTime, IsActive)
 VALUES
-('Admin Student', 'admin@test.pl', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.', NOW(), NOW(), 1);
+('tsaran', 'tsaran', '$2y$12$FqQTxohofHG25bOU0c0/Z.HZlBXDJYnNgCaANhzytXPVk3fsRXSXu', NOW(), NOW(), 1);
 
 INSERT INTO Categories (Name, Description, CreationDateTime, EditDateTime, IsActive)
 VALUES
