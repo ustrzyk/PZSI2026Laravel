@@ -14,12 +14,20 @@
             Koszyk jest pusty.
         </div>
     @else
+        @if($hasStockError)
+            <div class="alert alert-warning">
+                W koszyku znajduje się produkt, którego ilość jest większa niż aktualny stan magazynowy.
+                Usuń produkt z koszyka albo zmniejsz ilość przez ponowne dodanie po odświeżeniu stanu.
+            </div>
+        @endif
+
         <table class="table table-bordered table-striped">
             <thead>
             <tr>
                 <th>Produkt</th>
                 <th>Cena</th>
-                <th>Ilość</th>
+                <th>Ilość w koszyku</th>
+                <th>Stan magazynowy</th>
                 <th>Razem</th>
                 <th>Akcja</th>
             </tr>
@@ -33,13 +41,42 @@
                 @endphp
 
                 <tr>
-                    <td>{{ $product->Name }}</td>
-                    <td>{{ number_format($product->Price, 2) }} zł</td>
-                    <td>{{ $quantity }}</td>
-                    <td>{{ number_format($sum, 2) }} zł</td>
+                    <td>
+                        {{ $product->Name }}
+
+                        @if($quantity > $product->Stock)
+                            <div class="text-danger small">
+                                W koszyku jest więcej sztuk niż w magazynie.
+                            </div>
+                        @endif
+                    </td>
+
+                    <td>
+                        {{ number_format($product->Price, 2) }} zł
+                    </td>
+
+                    <td>
+                        {{ $quantity }}
+                    </td>
+
+                    <td>
+                        @if($product->Stock > 0)
+                            {{ $product->Stock }} szt.
+                        @else
+                            <span class="badge bg-danger">
+                                Brak w magazynie
+                            </span>
+                        @endif
+                    </td>
+
+                    <td>
+                        {{ number_format($sum, 2) }} zł
+                    </td>
+
                     <td>
                         <form method="POST" action="{{ route('cart.remove', $product->Id) }}">
                             @csrf
+
                             <button type="submit" class="btn btn-danger btn-sm">
                                 Usuń
                             </button>
@@ -86,9 +123,19 @@
                                   rows="3">{{ old('Address') }}</textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-success">
-                        Złóż zamówienie
-                    </button>
+                    @if($hasStockError)
+                        <button type="button" class="btn btn-secondary" disabled>
+                            Nie można złożyć zamówienia
+                        </button>
+
+                        <div class="text-danger mt-2">
+                            Popraw koszyk, ponieważ ilość produktu przekracza stan magazynowy.
+                        </div>
+                    @else
+                        <button type="submit" class="btn btn-success">
+                            Złóż zamówienie
+                        </button>
+                    @endif
                 </form>
             </div>
         </div>

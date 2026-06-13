@@ -8,6 +8,8 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderService
 {
@@ -72,41 +74,93 @@ class OrderService
         $cart = session('cart', []);
 
         if (count($cart) == 0) {
-            return;
+            throw ValidationException::withMessages([
+                'cart' => 'Koszyk jest pusty.'
+            ]);
         }
 
-        $total = 0;
+        DB::transaction(function () use ($request, $cart) {
+            $total = 0;
+            $productsToOrder = [];
 
-        foreach ($cart as $productId => $quantity) {
-            $product = Product::findOrFail($productId);
-            $total += $product->Price * $quantity;
-        }
+            foreach ($cart as $productId => $quantity) {
+                $quantity = (int) $quantity;
 
-        $order = new Order();
-        $order->UserId = session('user_id', 1);
-        $order->CustomerName = $request->input('CustomerName');
-        $order->CustomerEmail = $request->input('CustomerEmail');
-        $order->Address = $request->input('Address');
-        $order->Status = 'New';
-        $order->TotalPrice = $total;
-        $order->CreationDateTime = now();
-        $order->EditDateTime = now();
-        $order->IsActive = 1;
-        $order->save();
+                if ($quantity <= 0) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Nieprawidłowa ilość produktu w koszyku.'
+                    ]);
+                }
 
-        foreach ($cart as $productId => $quantity) {
-            $product = Product::findOrFail($productId);
+                // blokuję produkt na czas tworzenia zamówienia
+                $product = Product::where('IsActive', 1)
+                    ->lockForUpdate()
+                    ->find($productId);
 
-            $item = new OrderItem();
-            $item->OrderId = $order->Id;
-            $item->ProductId = $product->Id;
-            $item->Quantity = $quantity;
-            $item->Price = $product->Price;
-            $item->CreationDateTime = now();
-            $item->EditDateTime = now();
-            $item->IsActive = 1;
-            $item->save();
-        }
+                if (!$product) {
+                    throw ValidationException::withMessages([
+                        'cart' => 'Jeden z produktów w koszyku nie jest już dostępny.'
+                    ]);
+                }
+
+                if ($product->Stock <= 0) {
+                    throw ValidationException::withMessages([
+                        'stock' => 'Produkt "' . $product->Name . '" nie jest już dostępny w magazynie.'
+                    ]);
+                }
+
+                if ($quantity > $product->Stock) {
+                    throw ValidationException::withMessages([
+                        'stock' => 'Nie można złożyć zamówienia. Produkt "' . $product->Name . '" ma w magazynie tylko ' . $product->Stock . ' szt.'
+                    ]);
+                }
+
+                $total += $product->Price * $quantity;
+
+                $productsToOrder[] = [
+                    'product' => $product,
+                    'quantity' => $quantity,
+                ];
+            }
+
+            if ($total <= 0) {
+                throw ValidationException::withMessages([
+                    'cart' => 'Nie można złożyć pustego zamówienia.'
+                ]);
+            }
+
+            $order = new Order();
+            $order->UserId = session('user_id');
+            $order->CustomerName = $request->input('CustomerName');
+            $order->CustomerEmail = $request->input('CustomerEmail');
+            $order->Address = $request->input('Address');
+            $order->Status = 'New';
+            $order->TotalPrice = $total;
+            $order->CreationDateTime = now();
+            $order->EditDateTime = now();
+            $order->IsActive = 1;
+            $order->save();
+
+            foreach ($productsToOrder as $cartItem) {
+                $product = $cartItem['product'];
+                $quantity = $cartItem['quantity'];
+
+                $item = new OrderItem();
+                $item->OrderId = $order->Id;
+                $item->ProductId = $product->Id;
+                $item->Quantity = $quantity;
+                $item->Price = $product->Price;
+                $item->CreationDateTime = now();
+                $item->EditDateTime = now();
+                $item->IsActive = 1;
+                $item->save();
+
+                // po zakupie zmniejszam stan magazynowy
+                $product->Stock = $product->Stock - $quantity;
+                $product->EditDateTime = now();
+                $product->save();
+            }
+        });
 
         session()->forget('cart');
     }

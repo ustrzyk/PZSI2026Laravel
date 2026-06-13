@@ -20,6 +20,7 @@ class CartController extends Controller
         $cart = session('cart', []);
         $products = collect();
         $total = 0;
+        $hasStockError = false;
 
         if (count($cart) > 0) {
             $products = Product::whereIn('Id', array_keys($cart))
@@ -29,23 +30,46 @@ class CartController extends Controller
             foreach ($products as $product) {
                 $quantity = $cart[$product->Id] ?? 0;
                 $total += $product->Price * $quantity;
+
+                // sprawdzam, czy w koszyku nie ma więcej sztuk niż w magazynie
+                if ($quantity > $product->Stock) {
+                    $hasStockError = true;
+                }
             }
         }
 
         return view('cart.index', [
             'cart' => $cart,
             'products' => $products,
-            'total' => $total
+            'total' => $total,
+            'hasStockError' => $hasStockError
         ]);
     }
 
     public function add(int $id)
     {
-        // dodaje produkt do koszyka w sesji
+        // pobieram tylko aktywny produkt
         $product = Product::where('IsActive', 1)->findOrFail($id);
 
+        if ($product->Stock <= 0) {
+            return redirect()->back()
+                ->withErrors([
+                    'stock' => 'Tego produktu nie ma już w magazynie.'
+                ]);
+        }
+
         $cart = session('cart', []);
-        $cart[$product->Id] = ($cart[$product->Id] ?? 0) + 1;
+        $currentQuantity = $cart[$product->Id] ?? 0;
+
+        // nie pozwalam dodać więcej niż jest w magazynie
+        if ($currentQuantity >= $product->Stock) {
+            return redirect()->back()
+                ->withErrors([
+                    'stock' => 'Nie możesz dodać więcej sztuk tego produktu, ponieważ w magazynie jest tylko ' . $product->Stock . ' szt.'
+                ]);
+        }
+
+        $cart[$product->Id] = $currentQuantity + 1;
 
         session(['cart' => $cart]);
 
@@ -71,7 +95,7 @@ class CartController extends Controller
     {
         $this->orderService->createFromCart($request);
 
-        return redirect()->route('orders.index')
+        return redirect()->route('my-orders.index')
             ->with('success', 'Zamówienie zostało złożone.');
     }
 }

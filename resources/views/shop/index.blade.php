@@ -146,17 +146,31 @@
 
                                             <p class="mb-3">
                                                 <strong>Stan:</strong>
-                                                {{ $product->Stock }} szt.
+
+                                                @if($product->Stock > 0)
+                                                    {{ $product->Stock }} szt.
+                                                @else
+                                                    <span class="badge bg-danger">
+                                                        Brak w magazynie
+                                                    </span>
+                                                @endif
                                             </p>
                                         </div>
 
                                         <div class="card-footer">
-                                            <form method="POST" action="{{ route('cart.add', $product->Id) }}">
-                                                @csrf
-                                                <button class="btn btn-success w-100" type="submit">
-                                                    Dodaj do koszyka
+                                            @if($product->Stock > 0)
+                                                <form method="POST" action="{{ route('cart.add', $product->Id) }}">
+                                                    @csrf
+
+                                                    <button class="btn btn-success w-100" type="submit">
+                                                        Dodaj do koszyka
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <button class="btn btn-secondary w-100" type="button" disabled>
+                                                    Brak w magazynie
                                                 </button>
-                                            </form>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
