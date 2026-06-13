@@ -111,6 +111,7 @@ Aktualnie wykonano:
 19. Utworzenie widoku koszyka.
 20. Poprawienie widoku logowania tak, aby nie wyświetlał danych testowych.
 21. Utworzenie widoków CRUD dla produktów.
+22. Utworzenie widoków CRUD dla kategorii.
 ```
 
 ---
@@ -1204,7 +1205,115 @@ Przykład PUT przy edycji:
 
 ---
 
-## 29. Dziennik pracy
+## 29. Widoki kategorii
+
+Widoki kategorii znajdują się w katalogu:
+
+```txt
+resources/views/categories
+```
+
+Utworzone pliki:
+
+```txt
+index.blade.php
+create.blade.php
+edit.blade.php
+```
+
+Widok listy kategorii:
+
+```txt
+resources/views/categories/index.blade.php
+```
+
+Ten widok pokazuje kategorie w tabeli.
+
+Na liście kategorii są wyświetlane:
+
+```txt
+- ID,
+- nazwa kategorii,
+- opis kategorii,
+- przyciski akcji.
+```
+
+Widok dodawania kategorii:
+
+```txt
+resources/views/categories/create.blade.php
+```
+
+Ten widok zawiera formularz dodania nowej kategorii.
+
+W formularzu dodawania kategorii są pola:
+
+```txt
+Name
+Description
+```
+
+Widok edycji kategorii:
+
+```txt
+resources/views/categories/edit.blade.php
+```
+
+Ten widok zawiera formularz edycji istniejącej kategorii.
+
+---
+
+## 30. CRUD kategorii
+
+Dla kategorii przygotowano widoki potrzebne do operacji CRUD.
+
+Wyświetlanie kategorii:
+
+```txt
+/categories
+```
+
+Dodawanie kategorii:
+
+```txt
+/categories/create
+```
+
+Edycja kategorii:
+
+```txt
+/categories/edit/{id}
+```
+
+Dezaktywacja kategorii:
+
+```txt
+/categories/delete/{id}
+```
+
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
+
+```blade
+<form method="POST" action="{{ route('categories.delete', $category->Id) }}">
+    @csrf
+    @method('DELETE')
+</form>
+```
+
+Dodawanie kategorii używa formularza POST.
+
+Edycja kategorii używa formularza PUT:
+
+```blade
+<form method="POST" action="{{ route('categories.update', $category->Id) }}">
+    @csrf
+    @method('PUT')
+</form>
+```
+
+---
+
+## 31. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1537,9 +1646,27 @@ Widok edycji produktu pozwala zmienić dane produktu oraz jego akcesoria.
 
 Na tym etapie działa już część CRUD dla produktów.
 
+### Krok 12 - widoki kategorii
+
+Dodałem widoki CRUD dla kategorii:
+
+```txt
+resources/views/categories/index.blade.php
+resources/views/categories/create.blade.php
+resources/views/categories/edit.blade.php
+```
+
+Widok listy kategorii pokazuje kategorie w tabeli oraz pozwala je wyszukiwać.
+
+Widok dodawania kategorii pozwala dodać nową kategorię.
+
+Widok edycji kategorii pozwala zmienić nazwę i opis kategorii.
+
+Na tym etapie działa już część CRUD dla kategorii.
+
 ---
 
-## 30. Jak wgrać bazę danych
+## 32. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1568,7 +1695,7 @@ pzsi-druk-3d
 
 ---
 
-## 31. Jak sprawdzić trasy
+## 33. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1593,7 +1720,7 @@ order-items
 
 ---
 
-## 32. Jak uruchomić projekt
+## 34. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1625,18 +1752,18 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki kategorii, akcesoriów, zamówień i użytkowników będą dodane w kolejnych krokach.
+Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki akcesoriów, zamówień i użytkowników będą dodane w kolejnych krokach.
 
 ---
 
-## 33. Następny krok
+## 35. Następny krok
 
-Następnie zostaną przygotowane widoki CRUD dla kategorii.
+Następnie zostaną przygotowane widoki CRUD dla akcesoriów.
 
 Widoki będą znajdować się w katalogu:
 
 ```txt
-resources/views/categories
+resources/views/accessories
 ```
 
 Planowane pliki:
@@ -1647,4 +1774,4 @@ create.blade.php
 edit.blade.php
 ```
 
-Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować kategorie.
+Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować akcesoria.
