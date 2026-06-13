@@ -20,7 +20,8 @@ class Order extends Model
 
     public function items()
     {
-        // zamówienie ma wiele pozycji
-        return $this->hasMany(OrderItem::class, 'OrderId', 'Id');
+        // zamówienie ma wiele aktywnych pozycji
+        return $this->hasMany(OrderItem::class, 'OrderId', 'Id')
+            ->where('IsActive', 1);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
@@ -47,6 +48,9 @@ class OrderItemService
         $model->EditDateTime = now();
         $model->IsActive = 1;
         $model->save();
+
+        // po dodaniu pozycji przeliczam wartość całego zamówienia
+        $this->recalculateOrderTotal($model->OrderId);
     }
 
     public function update(Request $request, int $id): void
@@ -60,19 +64,55 @@ class OrderItemService
         $product = Product::findOrFail($request->input('ProductId'));
 
         $model = OrderItem::findOrFail($id);
+
+        // zapamiętuje stare zamówienie, bo pozycja może zostać przeniesiona do innego zamówienia
+        $oldOrderId = $model->OrderId;
+
         $model->OrderId = $request->input('OrderId');
         $model->ProductId = $request->input('ProductId');
         $model->Quantity = $request->input('Quantity');
         $model->Price = $product->Price;
         $model->EditDateTime = now();
         $model->save();
+
+        // przeliczam stare zamówienie
+        $this->recalculateOrderTotal($oldOrderId);
+
+        // jeśli pozycja została przeniesiona do innego zamówienia, przeliczam też nowe
+        if ($oldOrderId != $model->OrderId) {
+            $this->recalculateOrderTotal($model->OrderId);
+        }
     }
 
     public function delete(int $id): void
     {
         $model = OrderItem::findOrFail($id);
+        $orderId = $model->OrderId;
+
         $model->IsActive = 0;
         $model->EditDateTime = now();
         $model->save();
+
+        // po dezaktywacji pozycji przeliczam wartość zamówienia
+        $this->recalculateOrderTotal($orderId);
+    }
+
+    private function recalculateOrderTotal(int $orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+
+        $items = OrderItem::where('OrderId', $orderId)
+            ->where('IsActive', 1)
+            ->get();
+
+        $total = 0;
+
+        foreach ($items as $item) {
+            $total += $item->Price * $item->Quantity;
+        }
+
+        $order->TotalPrice = $total;
+        $order->EditDateTime = now();
+        $order->save();
     }
 }
