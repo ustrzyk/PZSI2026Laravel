@@ -16,12 +16,6 @@ Nazwa projektu lokalnie:
 C:\git\PZSI2026Laravel
 ```
 
-Repozytorium GitHub:
-
-```txt
-https://github.com/ustrzyk/PZSI2026Laravel
-```
-
 Nazwa bazy danych:
 
 ```txt
@@ -38,7 +32,7 @@ XAMPP
 phpMyAdmin
 Bootstrap
 Visual Studio Code
-Git / GitHub
+Git
 ```
 
 ---
@@ -98,12 +92,12 @@ Aktualnie wykonano:
 ```txt
 1. Utworzenie nowego projektu Laravel.
 2. Umieszczenie projektu w katalogu C:\git\PZSI2026Laravel.
-3. Utworzenie repozytorium GitHub.
-4. Połączenie projektu lokalnego z repozytorium GitHub.
-5. Przygotowanie projektu do dalszej pracy.
-6. Przygotowanie konfiguracji bazy danych w pliku .env.
-7. Przygotowanie skryptu SQL bazy danych.
-8. Dodanie danych testowych do bazy.
+3. Przygotowanie projektu do dalszej pracy.
+4. Przygotowanie konfiguracji bazy danych w pliku .env.
+5. Przygotowanie skryptu SQL bazy danych.
+6. Dodanie danych testowych do bazy.
+7. Utworzenie modeli Laravel.
+8. Dodanie relacji między modelami.
 ```
 
 ---
@@ -126,7 +120,7 @@ storage
 Opis wybranych katalogów:
 
 ```txt
-app/Models              - tutaj będą modele
+app/Models              - tutaj są modele
 app/Http/Controllers    - tutaj będą kontrolery
 app/Services            - tutaj będzie logika biznesowa
 resources/views         - tutaj będą widoki Blade
@@ -136,28 +130,7 @@ database                - tutaj jest plik SQL bazy danych
 
 ---
 
-## 6. Git i GitHub
-
-Projekt został połączony z repozytorium:
-
-```txt
-https://github.com/ustrzyk/PZSI2026Laravel
-```
-
-Podstawowe komendy używane w projekcie:
-
-```bash
-git status
-git add .
-git commit -m "Opis zmian"
-git push
-```
-
-Na tym etapie repozytorium zawiera początkowy projekt Laravel, konfigurację przykładową `.env.example`, plik SQL oraz opis projektu w README.
-
----
-
-## 7. Konfiguracja bazy danych
+## 6. Konfiguracja bazy danych
 
 Nazwa bazy danych:
 
@@ -184,9 +157,9 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Plik `.env` jest lokalny i nie trafia na GitHub, ponieważ jest dodany do `.gitignore`.
+Plik `.env` jest lokalny i nie powinien być udostępniany publicznie.
 
-Do repozytorium trafia tylko plik przykładowy:
+Do projektu dodany jest tylko plik przykładowy:
 
 ```txt
 .env.example
@@ -200,7 +173,7 @@ php artisan config:clear
 
 ---
 
-## 8. Struktura bazy danych
+## 7. Struktura bazy danych
 
 Skrypt SQL znajduje się w pliku:
 
@@ -257,7 +230,7 @@ Czyli jeden produkt może mieć wiele akcesoriów, a jedno akcesorium może paso
 
 ---
 
-## 9. Plik SQL
+## 8. Plik SQL
 
 Plik SQL tworzy bazę danych:
 
@@ -307,7 +280,7 @@ Dodałem też dane testowe, żeby od razu było co wyświetlać w aplikacji.
 
 ---
 
-## 10. Użytkownik testowy
+## 9. Użytkownik testowy
 
 W bazie jest dodany użytkownik testowy:
 
@@ -341,7 +314,7 @@ Hash::check()
 
 ---
 
-## 11. Dane testowe
+## 10. Dane testowe
 
 W bazie dodane są przykładowe kategorie:
 
@@ -378,7 +351,169 @@ Bambu Lab A1 Mini -> Stół magnetyczny
 
 ---
 
-## 12. Dziennik pracy
+## 11. Modele Laravel
+
+Modele znajdują się w katalogu:
+
+```txt
+app/Models
+```
+
+Utworzone modele:
+
+```txt
+User
+Category
+Product
+Accessory
+Order
+OrderItem
+```
+
+Każdy model odpowiada jednej tabeli w bazie danych.
+
+Przykładowo model `Product` odpowiada tabeli:
+
+```txt
+Products
+```
+
+W modelach ustawiłem nazwy tabel:
+
+```php
+protected $table = 'Products';
+```
+
+Ustawiłem też klucz główny:
+
+```php
+protected $primaryKey = 'Id';
+```
+
+Ponieważ w bazie używam własnych nazw pól dat, w modelach ustawiłem:
+
+```php
+const CREATED_AT = 'CreationDateTime';
+const UPDATED_AT = 'EditDateTime';
+```
+
+Dzięki temu Laravel wie, że ma używać moich kolumn dat zamiast domyślnych `created_at` i `updated_at`.
+
+---
+
+## 12. Relacje w modelach
+
+W modelach dodałem relacje między tabelami.
+
+Relacja kategorii z produktami:
+
+```txt
+Category -> Products
+```
+
+W modelu `Category`:
+
+```php
+return $this->hasMany(Product::class, 'CategoryId', 'Id');
+```
+
+Relacja produktu z kategorią:
+
+```txt
+Product -> Category
+```
+
+W modelu `Product`:
+
+```php
+return $this->belongsTo(Category::class, 'CategoryId', 'Id');
+```
+
+Relacja produktu z akcesoriami:
+
+```txt
+Product -> Accessories
+```
+
+W modelu `Product`:
+
+```php
+return $this->belongsToMany(
+    Accessory::class,
+    'ProductAccessories',
+    'ProductId',
+    'AccessoryId'
+);
+```
+
+Relacja akcesorium z produktami:
+
+```txt
+Accessory -> Products
+```
+
+W modelu `Accessory`:
+
+```php
+return $this->belongsToMany(
+    Product::class,
+    'ProductAccessories',
+    'AccessoryId',
+    'ProductId'
+);
+```
+
+Relacja użytkownika z zamówieniami:
+
+```txt
+User -> Orders
+```
+
+W modelu `User`:
+
+```php
+return $this->hasMany(Order::class, 'UserId', 'Id');
+```
+
+Relacja zamówienia z użytkownikiem:
+
+```txt
+Order -> User
+```
+
+W modelu `Order`:
+
+```php
+return $this->belongsTo(User::class, 'UserId', 'Id');
+```
+
+Relacja zamówienia z pozycjami:
+
+```txt
+Order -> OrderItems
+```
+
+W modelu `Order`:
+
+```php
+return $this->hasMany(OrderItem::class, 'OrderId', 'Id');
+```
+
+Relacja pozycji zamówienia z produktem:
+
+```txt
+OrderItem -> Product
+```
+
+W modelu `OrderItem`:
+
+```php
+return $this->belongsTo(Product::class, 'ProductId', 'Id');
+```
+
+---
+
+## 13. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -400,15 +535,11 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-### Krok 2 - GitHub
+### Krok 2 - przygotowanie projektu
 
-Dodałem projekt do repozytorium GitHub:
+Przygotowałem czysty projekt Laravel do dalszej pracy.
 
-```txt
-https://github.com/ustrzyk/PZSI2026Laravel
-```
-
-Na tym etapie mam czysty projekt Laravel i mogę zaczynać dodawanie funkcjonalności sklepu.
+Na tym etapie projekt zawierał podstawową strukturę katalogów Laravel.
 
 ### Krok 3 - baza danych
 
@@ -463,9 +594,56 @@ Login: tsaran
 Hasło: dalej
 ```
 
+### Krok 4 - modele Laravel
+
+Dodałem modele Laravel dla tabel z bazy danych.
+
+Modele znajdują się w folderze:
+
+```txt
+app/Models
+```
+
+Utworzone modele:
+
+```txt
+User
+Category
+Product
+Accessory
+Order
+OrderItem
+```
+
+W modelach ustawiłem nazwy tabel, klucze główne oraz pola dat.
+
+Dodałem też relacje między modelami:
+
+```txt
+Category -> Products
+Product -> Category
+Product -> Accessories
+Accessory -> Products
+User -> Orders
+Order -> User
+Order -> OrderItems
+OrderItem -> Order
+OrderItem -> Product
+```
+
+Najważniejszą relacją jest relacja wiele-do-wielu między produktami i akcesoriami.
+
+Ta relacja jest obsługiwana przez tabelę:
+
+```txt
+ProductAccessories
+```
+
+Na tym etapie projekt ma już przygotowaną warstwę modeli do dalszej pracy z serwisami i kontrolerami.
+
 ---
 
-## 13. Jak wgrać bazę danych
+## 14. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -494,7 +672,7 @@ pzsi-druk-3d
 
 ---
 
-## 14. Jak uruchomić projekt
+## 15. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -516,33 +694,37 @@ http://127.0.0.1:8000
 
 ---
 
-## 15. Następny krok
+## 16. Następny krok
 
-Następnie zostaną przygotowane modele Laravel dla tabel:
+Następnie zostaną przygotowane serwisy Laravel.
 
-```txt
-User
-Category
-Product
-Accessory
-Order
-OrderItem
-```
-
-Modele będą znajdować się w katalogu:
+Serwisy będą znajdować się w katalogu:
 
 ```txt
-app/Models
+app/Services
 ```
 
-W modelach zostaną dodane relacje między tabelami, np.:
+Planowane serwisy:
 
 ```txt
-Product -> Category
-Product -> Accessories
-Order -> User
-Order -> OrderItems
-OrderItem -> Product
+ProductService
+CategoryService
+AccessoryService
+UserService
+AuthService
+OrderService
+OrderItemService
 ```
 
-Po dodaniu modeli ten README zostanie ponownie zaktualizowany o kolejny krok.
+W serwisach będzie logika biznesowa, między innymi:
+
+```txt
+- pobieranie danych,
+- dodawanie rekordów,
+- edycja rekordów,
+- dezaktywacja rekordów,
+- wyszukiwanie,
+- walidacja formularzy.
+```
+
+Po dodaniu serwisów ten README zostanie ponownie zaktualizowany o kolejny krok.
