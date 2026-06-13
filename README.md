@@ -98,6 +98,10 @@ Aktualnie wykonano:
 6. Dodanie danych testowych do bazy.
 7. Utworzenie modeli Laravel.
 8. Dodanie relacji między modelami.
+9. Utworzenie serwisów Laravel.
+10. Dodanie walidacji formularzy w serwisach.
+11. Dodanie logiki logowania i rejestracji.
+12. Dodanie logiki obsługi zamówień z koszyka.
 ```
 
 ---
@@ -122,7 +126,7 @@ Opis wybranych katalogów:
 ```txt
 app/Models              - tutaj są modele
 app/Http/Controllers    - tutaj będą kontrolery
-app/Services            - tutaj będzie logika biznesowa
+app/Services            - tutaj są serwisy z logiką biznesową
 resources/views         - tutaj będą widoki Blade
 routes/web.php          - tutaj będą trasy strony
 database                - tutaj jest plik SQL bazy danych
@@ -306,7 +310,7 @@ Password: zahashowane hasło
 Hasło nie jest zapisane zwykłym tekstem.
 W SQL jest zapisany hash hasła `dalej`.
 
-W kodzie logowania później będę sprawdzał hasło przez:
+W kodzie logowania hasło będzie sprawdzane przez:
 
 ```php
 Hash::check()
@@ -499,6 +503,18 @@ W modelu `Order`:
 return $this->hasMany(OrderItem::class, 'OrderId', 'Id');
 ```
 
+Relacja pozycji zamówienia z zamówieniem:
+
+```txt
+OrderItem -> Order
+```
+
+W modelu `OrderItem`:
+
+```php
+return $this->belongsTo(Order::class, 'OrderId', 'Id');
+```
+
 Relacja pozycji zamówienia z produktem:
 
 ```txt
@@ -513,7 +529,206 @@ return $this->belongsTo(Product::class, 'ProductId', 'Id');
 
 ---
 
-## 13. Dziennik pracy
+## 13. Serwisy Laravel
+
+Serwisy znajdują się w katalogu:
+
+```txt
+app/Services
+```
+
+Utworzone serwisy:
+
+```txt
+ProductService
+CategoryService
+AccessoryService
+UserService
+AuthService
+OrderService
+OrderItemService
+```
+
+Serwisy odpowiadają za logikę biznesową aplikacji.
+
+W serwisach znajdują się metody do:
+
+```txt
+- pobierania danych,
+- wyszukiwania danych,
+- dodawania rekordów,
+- edycji rekordów,
+- dezaktywacji rekordów,
+- walidacji formularzy,
+- obsługi logowania,
+- obsługi rejestracji,
+- obsługi zamówień z koszyka.
+```
+
+Dzięki temu kontrolery będą krótsze, bo większość logiki jest przeniesiona do serwisów.
+
+---
+
+## 14. Walidacja w serwisach
+
+Walidacja formularzy jest wykonywana w serwisach przez:
+
+```php
+$request->validate()
+```
+
+Przykład walidacji produktu:
+
+```php
+$request->validate([
+    'Name' => ['required', 'string', 'max:150'],
+    'Description' => ['required', 'string', 'min:5'],
+    'Price' => ['required', 'numeric', 'min:0.01'],
+    'Stock' => ['required', 'integer', 'min:0'],
+    'CategoryId' => ['required', 'integer', 'exists:Categories,Id'],
+    'ImageUrl' => ['nullable', 'string', 'max:255'],
+    'Accessories' => ['nullable', 'array'],
+]);
+```
+
+W tej walidacji sprawdzam między innymi:
+
+```txt
+- czy nazwa produktu jest wymagana,
+- czy opis ma minimum 5 znaków,
+- czy cena jest większa od 0,
+- czy stan magazynowy nie jest ujemny,
+- czy wybrana kategoria istnieje w tabeli Categories,
+- czy lista akcesoriów jest tablicą.
+```
+
+---
+
+## 15. Wyszukiwanie w serwisach
+
+Wyszukiwanie jest realizowane przez query params.
+
+Przykładowy adres:
+
+```txt
+/products?search=bambu
+```
+
+W serwisie pobieram parametr:
+
+```php
+$request->query('search')
+```
+
+Przykład z serwisu produktu:
+
+```php
+if ($request->query('search')) {
+    $query->where('Name', 'like', '%' . $request->query('search') . '%');
+}
+```
+
+Dzięki temu można wyszukiwać dane po nazwie.
+
+---
+
+## 16. Dezaktywacja rekordów
+
+Rekordy nie są usuwane fizycznie z bazy.
+
+Zamiast tego ustawiam:
+
+```php
+$model->IsActive = 0;
+$model->EditDateTime = now();
+$model->save();
+```
+
+Dzięki temu rekord zostaje w bazie danych, ale nie powinien być wyświetlany w aplikacji.
+
+---
+
+## 17. Logowanie i rejestracja
+
+Logika logowania i rejestracji znajduje się w serwisie:
+
+```txt
+AuthService
+```
+
+Podczas rejestracji hasło jest zapisywane jako hash:
+
+```php
+Hash::make($request->input('Password'))
+```
+
+Podczas logowania hasło jest sprawdzane przez:
+
+```php
+Hash::check($request->input('Password'), $user->Password)
+```
+
+Po poprawnym logowaniu dane użytkownika są zapisywane w sesji:
+
+```php
+session(['user_id' => $user->Id]);
+session(['user_name' => $user->Name]);
+```
+
+Wylogowanie usuwa dane z sesji:
+
+```php
+session()->forget('user_id');
+session()->forget('user_name');
+```
+
+---
+
+## 18. Obsługa koszyka i zamówień
+
+Koszyk będzie przechowywany w sesji Laravel.
+
+W serwisie `OrderService` dodana jest metoda:
+
+```txt
+createFromCart()
+```
+
+Metoda ta będzie tworzyć zamówienie na podstawie produktów zapisanych w koszyku.
+
+Najpierw pobierany jest koszyk z sesji:
+
+```php
+$cart = session('cart', []);
+```
+
+Potem liczona jest suma zamówienia:
+
+```php
+$total += $product->Price * $quantity;
+```
+
+Następnie tworzony jest rekord w tabeli:
+
+```txt
+Orders
+```
+
+oraz pozycje zamówienia w tabeli:
+
+```txt
+OrderItems
+```
+
+Po złożeniu zamówienia koszyk jest czyszczony:
+
+```php
+session()->forget('cart');
+```
+
+---
+
+## 19. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -641,9 +856,67 @@ ProductAccessories
 
 Na tym etapie projekt ma już przygotowaną warstwę modeli do dalszej pracy z serwisami i kontrolerami.
 
+### Krok 5 - serwisy Laravel
+
+Dodałem serwisy Laravel, które odpowiadają za logikę biznesową aplikacji.
+
+Serwisy znajdują się w katalogu:
+
+```txt
+app/Services
+```
+
+Utworzone serwisy:
+
+```txt
+ProductService
+CategoryService
+AccessoryService
+UserService
+AuthService
+OrderService
+OrderItemService
+```
+
+W serwisach dodałem metody do:
+
+```txt
+- pobierania danych,
+- wyszukiwania danych,
+- dodawania rekordów,
+- edycji rekordów,
+- dezaktywacji rekordów,
+- walidacji formularzy,
+- obsługi logowania,
+- obsługi rejestracji,
+- obsługi zamówień z koszyka.
+```
+
+Przykład dezaktywacji rekordu:
+
+```php
+$model->IsActive = 0;
+$model->EditDateTime = now();
+$model->save();
+```
+
+Przykład hashowania hasła:
+
+```php
+Hash::make($request->input('Password'))
+```
+
+Przykład sprawdzania hasła przy logowaniu:
+
+```php
+Hash::check($request->input('Password'), $user->Password)
+```
+
+Na tym etapie projekt ma przygotowane modele i serwisy. Następnym krokiem będzie dodanie kontrolerów.
+
 ---
 
-## 14. Jak wgrać bazę danych
+## 20. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -672,7 +945,7 @@ pzsi-druk-3d
 
 ---
 
-## 15. Jak uruchomić projekt
+## 21. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -680,7 +953,19 @@ W terminalu trzeba wejść do katalogu projektu:
 cd /c/git/PZSI2026Laravel
 ```
 
-Następnie uruchomić projekt:
+Następnie odświeżyć autoload:
+
+```bash
+composer dump-autoload
+```
+
+Wyczyścić konfigurację:
+
+```bash
+php artisan config:clear
+```
+
+Uruchomić projekt:
 
 ```bash
 php artisan serve
@@ -694,37 +979,30 @@ http://127.0.0.1:8000
 
 ---
 
-## 16. Następny krok
+## 22. Następny krok
 
-Następnie zostaną przygotowane serwisy Laravel.
+Następnie zostaną przygotowane kontrolery Laravel.
 
-Serwisy będą znajdować się w katalogu:
-
-```txt
-app/Services
-```
-
-Planowane serwisy:
+Kontrolery będą znajdować się w katalogu:
 
 ```txt
-ProductService
-CategoryService
-AccessoryService
-UserService
-AuthService
-OrderService
-OrderItemService
+app/Http/Controllers
 ```
 
-W serwisach będzie logika biznesowa, między innymi:
+Planowane kontrolery:
 
 ```txt
-- pobieranie danych,
-- dodawanie rekordów,
-- edycja rekordów,
-- dezaktywacja rekordów,
-- wyszukiwanie,
-- walidacja formularzy.
+ShopController
+ProductController
+CategoryController
+AccessoryController
+UserController
+AuthController
+CartController
+OrderController
+OrderItemController
 ```
 
-Po dodaniu serwisów ten README zostanie ponownie zaktualizowany o kolejny krok.
+Kontrolery będą odbierać żądania z tras, wywoływać odpowiednie serwisy i zwracać widoki Blade.
+
+Po dodaniu kontrolerów ten README zostanie ponownie zaktualizowany o kolejny krok.
