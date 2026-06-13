@@ -112,6 +112,7 @@ Aktualnie wykonano:
 20. Poprawienie widoku logowania tak, aby nie wyświetlał danych testowych.
 21. Utworzenie widoków CRUD dla produktów.
 22. Utworzenie widoków CRUD dla kategorii.
+23. Utworzenie widoków CRUD dla akcesoriów.
 ```
 
 ---
@@ -1313,7 +1314,117 @@ Edycja kategorii używa formularza PUT:
 
 ---
 
-## 31. Dziennik pracy
+## 31. Widoki akcesoriów
+
+Widoki akcesoriów znajdują się w katalogu:
+
+```txt
+resources/views/accessories
+```
+
+Utworzone pliki:
+
+```txt
+index.blade.php
+create.blade.php
+edit.blade.php
+```
+
+Widok listy akcesoriów:
+
+```txt
+resources/views/accessories/index.blade.php
+```
+
+Ten widok pokazuje akcesoria w tabeli.
+
+Na liście akcesoriów są wyświetlane:
+
+```txt
+- ID,
+- nazwa akcesorium,
+- opis akcesorium,
+- cena,
+- przyciski akcji.
+```
+
+Widok dodawania akcesorium:
+
+```txt
+resources/views/accessories/create.blade.php
+```
+
+Ten widok zawiera formularz dodania nowego akcesorium.
+
+W formularzu dodawania akcesorium są pola:
+
+```txt
+Name
+Description
+Price
+```
+
+Widok edycji akcesorium:
+
+```txt
+resources/views/accessories/edit.blade.php
+```
+
+Ten widok zawiera formularz edycji istniejącego akcesorium.
+
+---
+
+## 32. CRUD akcesoriów
+
+Dla akcesoriów przygotowano widoki potrzebne do operacji CRUD.
+
+Wyświetlanie akcesoriów:
+
+```txt
+/accessories
+```
+
+Dodawanie akcesorium:
+
+```txt
+/accessories/create
+```
+
+Edycja akcesorium:
+
+```txt
+/accessories/edit/{id}
+```
+
+Dezaktywacja akcesorium:
+
+```txt
+/accessories/delete/{id}
+```
+
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
+
+```blade
+<form method="POST" action="{{ route('accessories.delete', $accessory->Id) }}">
+    @csrf
+    @method('DELETE')
+</form>
+```
+
+Dodawanie akcesorium używa formularza POST.
+
+Edycja akcesorium używa formularza PUT:
+
+```blade
+<form method="POST" action="{{ route('accessories.update', $accessory->Id) }}">
+    @csrf
+    @method('PUT')
+</form>
+```
+
+---
+
+## 33. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1664,9 +1775,27 @@ Widok edycji kategorii pozwala zmienić nazwę i opis kategorii.
 
 Na tym etapie działa już część CRUD dla kategorii.
 
+### Krok 13 - widoki akcesoriów
+
+Dodałem widoki CRUD dla akcesoriów:
+
+```txt
+resources/views/accessories/index.blade.php
+resources/views/accessories/create.blade.php
+resources/views/accessories/edit.blade.php
+```
+
+Widok listy akcesoriów pokazuje akcesoria w tabeli oraz pozwala je wyszukiwać.
+
+Widok dodawania akcesorium pozwala dodać nazwę, opis i cenę.
+
+Widok edycji akcesorium pozwala zmienić nazwę, opis i cenę.
+
+Na tym etapie działa już część CRUD dla akcesoriów.
+
 ---
 
-## 32. Jak wgrać bazę danych
+## 34. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1695,7 +1824,7 @@ pzsi-druk-3d
 
 ---
 
-## 33. Jak sprawdzić trasy
+## 35. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1720,7 +1849,7 @@ order-items
 
 ---
 
-## 34. Jak uruchomić projekt
+## 36. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1752,18 +1881,18 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki akcesoriów, zamówień i użytkowników będą dodane w kolejnych krokach.
+Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki zamówień, użytkowników i pozycji zamówień będą dodane w kolejnych krokach.
 
 ---
 
-## 35. Następny krok
+## 37. Następny krok
 
-Następnie zostaną przygotowane widoki CRUD dla akcesoriów.
+Następnie zostaną przygotowane widoki CRUD dla użytkowników.
 
 Widoki będą znajdować się w katalogu:
 
 ```txt
-resources/views/accessories
+resources/views/users
 ```
 
 Planowane pliki:
@@ -1774,4 +1903,4 @@ create.blade.php
 edit.blade.php
 ```
 
-Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować akcesoria.
+Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować użytkowników.
