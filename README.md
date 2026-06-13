@@ -102,6 +102,8 @@ Aktualnie wykonano:
 10. Dodanie walidacji formularzy w serwisach.
 11. Dodanie logiki logowania i rejestracji.
 12. Dodanie logiki obsługi zamówień z koszyka.
+13. Utworzenie kontrolerów Laravel.
+14. Połączenie kontrolerów z serwisami.
 ```
 
 ---
@@ -125,7 +127,7 @@ Opis wybranych katalogów:
 
 ```txt
 app/Models              - tutaj są modele
-app/Http/Controllers    - tutaj będą kontrolery
+app/Http/Controllers    - tutaj są kontrolery
 app/Services            - tutaj są serwisy z logiką biznesową
 resources/views         - tutaj będą widoki Blade
 routes/web.php          - tutaj będą trasy strony
@@ -565,7 +567,7 @@ W serwisach znajdują się metody do:
 - obsługi zamówień z koszyka.
 ```
 
-Dzięki temu kontrolery będą krótsze, bo większość logiki jest przeniesiona do serwisów.
+Dzięki temu kontrolery są krótsze, bo większość logiki jest przeniesiona do serwisów.
 
 ---
 
@@ -728,7 +730,69 @@ session()->forget('cart');
 
 ---
 
-## 19. Dziennik pracy
+## 19. Kontrolery Laravel
+
+Kontrolery znajdują się w katalogu:
+
+```txt
+app/Http/Controllers
+```
+
+Utworzone kontrolery:
+
+```txt
+ShopController
+ProductController
+CategoryController
+AccessoryController
+UserController
+AuthController
+CartController
+OrderController
+OrderItemController
+```
+
+Kontrolery odpowiadają za obsługę żądań użytkownika.
+
+Schemat działania aplikacji wygląda tak:
+
+```txt
+route -> controller -> service -> model -> database
+```
+
+Kontroler odbiera żądanie z trasy, przekazuje dane do serwisu, a na końcu zwraca odpowiedni widok Blade.
+
+Przykład:
+
+```txt
+/products -> ProductController -> ProductService -> Product -> Products
+```
+
+---
+
+## 20. Rola poszczególnych kontrolerów
+
+`ShopController` odpowiada za stronę główną sklepu i wyświetlanie produktów.
+
+`ProductController` odpowiada za CRUD produktów.
+
+`CategoryController` odpowiada za CRUD kategorii.
+
+`AccessoryController` odpowiada za CRUD akcesoriów.
+
+`UserController` odpowiada za CRUD użytkowników.
+
+`AuthController` odpowiada za logowanie, rejestrację i wylogowanie.
+
+`CartController` odpowiada za koszyk, dodawanie produktów do koszyka, usuwanie produktów z koszyka i składanie zamówienia.
+
+`OrderController` odpowiada za listę zamówień, edycję statusu zamówienia i dezaktywację zamówienia.
+
+`OrderItemController` odpowiada za pozycje zamówień.
+
+---
+
+## 21. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -912,11 +976,50 @@ Przykład sprawdzania hasła przy logowaniu:
 Hash::check($request->input('Password'), $user->Password)
 ```
 
-Na tym etapie projekt ma przygotowane modele i serwisy. Następnym krokiem będzie dodanie kontrolerów.
+Na tym etapie projekt ma przygotowane modele i serwisy.
+
+### Krok 6 - kontrolery Laravel
+
+Dodałem kontrolery Laravel, które łączą trasy aplikacji z serwisami.
+
+Kontrolery znajdują się w katalogu:
+
+```txt
+app/Http/Controllers
+```
+
+Utworzone kontrolery:
+
+```txt
+ShopController
+ProductController
+CategoryController
+AccessoryController
+UserController
+AuthController
+CartController
+OrderController
+OrderItemController
+```
+
+Kontrolery korzystają z serwisów przez konstruktor.
+
+Przykład:
+
+```php
+public function __construct(ProductService $productService)
+{
+    $this->productService = $productService;
+}
+```
+
+Dzięki temu kontroler nie musi zawierać całej logiki biznesowej, tylko wywołuje odpowiedni serwis.
+
+Na tym etapie projekt ma przygotowane modele, serwisy i kontrolery. Następnym krokiem będzie dodanie tras w pliku `routes/web.php`.
 
 ---
 
-## 20. Jak wgrać bazę danych
+## 22. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -945,7 +1048,7 @@ pzsi-druk-3d
 
 ---
 
-## 21. Jak uruchomić projekt
+## 23. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -979,30 +1082,32 @@ http://127.0.0.1:8000
 
 ---
 
-## 22. Następny krok
+## 24. Następny krok
 
-Następnie zostaną przygotowane kontrolery Laravel.
-
-Kontrolery będą znajdować się w katalogu:
+Następnie zostaną przygotowane trasy aplikacji w pliku:
 
 ```txt
-app/Http/Controllers
+routes/web.php
 ```
 
-Planowane kontrolery:
+Trasy połączą adresy URL z kontrolerami.
+
+Przykładowo:
 
 ```txt
-ShopController
-ProductController
-CategoryController
-AccessoryController
-UserController
-AuthController
-CartController
-OrderController
-OrderItemController
+/products -> ProductController@index
+/products/create -> ProductController@create
+/products/edit/{id} -> ProductController@edit
 ```
 
-Kontrolery będą odbierać żądania z tras, wywoływać odpowiednie serwisy i zwracać widoki Blade.
+W trasach zostaną użyte:
 
-Po dodaniu kontrolerów ten README zostanie ponownie zaktualizowany o kolejny krok.
+```txt
+- query params,
+- url params,
+- POST,
+- PUT,
+- DELETE.
+```
+
+
