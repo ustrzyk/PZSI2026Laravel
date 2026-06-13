@@ -52,19 +52,19 @@
 
                     <select name="Status" class="form-control">
                         <option value="New" @if(old('Status', $order->Status) == 'New') selected @endif>
-                            New
+                            Nowe
                         </option>
 
                         <option value="Paid" @if(old('Status', $order->Status) == 'Paid') selected @endif>
-                            Paid
+                            Opłacone
                         </option>
 
                         <option value="Sent" @if(old('Status', $order->Status) == 'Sent') selected @endif>
-                            Sent
+                            Wysłane
                         </option>
 
                         <option value="Finished" @if(old('Status', $order->Status) == 'Finished') selected @endif>
-                            Finished
+                            Zakończone
                         </option>
                     </select>
                 </div>

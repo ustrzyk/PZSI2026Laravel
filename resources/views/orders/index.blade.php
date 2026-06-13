@@ -37,7 +37,19 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <div>
                         <strong>Zamówienie #{{ $order->Id }}</strong>
-                        <span class="badge bg-dark ms-2">{{ $order->Status }}</span>
+                        <span class="badge bg-dark ms-2">
+                            @if($order->Status == 'New')
+                                Nowe
+                            @elseif($order->Status == 'Paid')
+                                Opłacone
+                            @elseif($order->Status == 'Sent')
+                                Wysłane
+                            @elseif($order->Status == 'Finished')
+                                Zakończone
+                            @else
+                                {{ $order->Status }}
+                            @endif
+                        </span>
                     </div>
 
                     <div>
