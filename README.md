@@ -113,6 +113,7 @@ Aktualnie wykonano:
 21. Utworzenie widoków CRUD dla produktów.
 22. Utworzenie widoków CRUD dla kategorii.
 23. Utworzenie widoków CRUD dla akcesoriów.
+24. Utworzenie widoków CRUD dla użytkowników.
 ```
 
 ---
@@ -1098,13 +1099,7 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy produktów:
-
-```txt
-resources/views/products/index.blade.php
-```
-
-Ten widok pokazuje produkty w tabeli.
+Widok listy produktów pokazuje produkty w tabeli.
 
 Na liście produktów są wyświetlane:
 
@@ -1118,15 +1113,7 @@ Na liście produktów są wyświetlane:
 - przyciski akcji.
 ```
 
-Widok dodawania produktu:
-
-```txt
-resources/views/products/create.blade.php
-```
-
-Ten widok zawiera formularz dodania nowego produktu.
-
-W formularzu dodawania produktu są pola:
+Widok dodawania produktu zawiera pola:
 
 ```txt
 Name
@@ -1138,13 +1125,7 @@ ImageUrl
 Accessories[]
 ```
 
-Widok edycji produktu:
-
-```txt
-resources/views/products/edit.blade.php
-```
-
-Ten widok zawiera formularz edycji istniejącego produktu.
+Widok edycji produktu pozwala zmienić dane produktu oraz jego akcesoria.
 
 Akcesoria produktu są wybierane przez checkboxy:
 
@@ -1195,15 +1176,6 @@ Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
 
 Dodawanie i edycja produktów używa formularzy POST oraz PUT.
 
-Przykład PUT przy edycji:
-
-```blade
-<form method="POST" action="{{ route('products.update', $product->Id) }}">
-    @csrf
-    @method('PUT')
-</form>
-```
-
 ---
 
 ## 29. Widoki kategorii
@@ -1222,13 +1194,7 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy kategorii:
-
-```txt
-resources/views/categories/index.blade.php
-```
-
-Ten widok pokazuje kategorie w tabeli.
+Widok listy kategorii pokazuje kategorie w tabeli.
 
 Na liście kategorii są wyświetlane:
 
@@ -1239,28 +1205,14 @@ Na liście kategorii są wyświetlane:
 - przyciski akcji.
 ```
 
-Widok dodawania kategorii:
-
-```txt
-resources/views/categories/create.blade.php
-```
-
-Ten widok zawiera formularz dodania nowej kategorii.
-
-W formularzu dodawania kategorii są pola:
+Widok dodawania kategorii zawiera pola:
 
 ```txt
 Name
 Description
 ```
 
-Widok edycji kategorii:
-
-```txt
-resources/views/categories/edit.blade.php
-```
-
-Ten widok zawiera formularz edycji istniejącej kategorii.
+Widok edycji kategorii zawiera formularz edycji istniejącej kategorii.
 
 ---
 
@@ -1301,16 +1253,7 @@ Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
 </form>
 ```
 
-Dodawanie kategorii używa formularza POST.
-
-Edycja kategorii używa formularza PUT:
-
-```blade
-<form method="POST" action="{{ route('categories.update', $category->Id) }}">
-    @csrf
-    @method('PUT')
-</form>
-```
+Dodawanie kategorii używa formularza POST, a edycja kategorii używa formularza PUT.
 
 ---
 
@@ -1330,13 +1273,7 @@ create.blade.php
 edit.blade.php
 ```
 
-Widok listy akcesoriów:
-
-```txt
-resources/views/accessories/index.blade.php
-```
-
-Ten widok pokazuje akcesoria w tabeli.
+Widok listy akcesoriów pokazuje akcesoria w tabeli.
 
 Na liście akcesoriów są wyświetlane:
 
@@ -1348,15 +1285,7 @@ Na liście akcesoriów są wyświetlane:
 - przyciski akcji.
 ```
 
-Widok dodawania akcesorium:
-
-```txt
-resources/views/accessories/create.blade.php
-```
-
-Ten widok zawiera formularz dodania nowego akcesorium.
-
-W formularzu dodawania akcesorium są pola:
+Widok dodawania akcesorium zawiera pola:
 
 ```txt
 Name
@@ -1364,13 +1293,7 @@ Description
 Price
 ```
 
-Widok edycji akcesorium:
-
-```txt
-resources/views/accessories/edit.blade.php
-```
-
-Ten widok zawiera formularz edycji istniejącego akcesorium.
+Widok edycji akcesorium zawiera formularz edycji istniejącego akcesorium.
 
 ---
 
@@ -1402,29 +1325,138 @@ Dezaktywacja akcesorium:
 /accessories/delete/{id}
 ```
 
+Dezaktywacja jest wykonywana przez formularz z metodą DELETE.
+
+Dodawanie akcesorium używa formularza POST, a edycja akcesorium używa formularza PUT.
+
+---
+
+## 33. Widoki użytkowników
+
+Widoki użytkowników znajdują się w katalogu:
+
+```txt
+resources/views/users
+```
+
+Utworzone pliki:
+
+```txt
+index.blade.php
+create.blade.php
+edit.blade.php
+```
+
+Widok listy użytkowników:
+
+```txt
+resources/views/users/index.blade.php
+```
+
+Ten widok pokazuje użytkowników w tabeli.
+
+Na liście użytkowników są wyświetlane:
+
+```txt
+- ID,
+- nazwa użytkownika,
+- login,
+- przyciski akcji.
+```
+
+Hasło użytkownika nie jest wyświetlane na liście.
+
+Widok dodawania użytkownika:
+
+```txt
+resources/views/users/create.blade.php
+```
+
+Ten widok zawiera formularz dodania nowego użytkownika.
+
+W formularzu dodawania użytkownika są pola:
+
+```txt
+Name
+Email
+Password
+```
+
+W tym projekcie pole `Email` pełni funkcję loginu.
+
+Widok edycji użytkownika:
+
+```txt
+resources/views/users/edit.blade.php
+```
+
+Ten widok zawiera formularz edycji użytkownika.
+
+W edycji można zmienić:
+
+```txt
+- nazwę użytkownika,
+- login,
+- hasło.
+```
+
+Pole hasła w edycji można zostawić puste, wtedy hasło nie zostanie zmienione.
+
+---
+
+## 34. CRUD użytkowników
+
+Dla użytkowników przygotowano widoki potrzebne do operacji CRUD.
+
+Wyświetlanie użytkowników:
+
+```txt
+/users
+```
+
+Dodawanie użytkownika:
+
+```txt
+/users/create
+```
+
+Edycja użytkownika:
+
+```txt
+/users/edit/{id}
+```
+
+Dezaktywacja użytkownika:
+
+```txt
+/users/delete/{id}
+```
+
 Dezaktywacja jest wykonywana przez formularz z metodą DELETE:
 
 ```blade
-<form method="POST" action="{{ route('accessories.delete', $accessory->Id) }}">
+<form method="POST" action="{{ route('users.delete', $user->Id) }}">
     @csrf
     @method('DELETE')
 </form>
 ```
 
-Dodawanie akcesorium używa formularza POST.
+Dodawanie użytkownika używa formularza POST.
 
-Edycja akcesorium używa formularza PUT:
+Edycja użytkownika używa formularza PUT:
 
 ```blade
-<form method="POST" action="{{ route('accessories.update', $accessory->Id) }}">
+<form method="POST" action="{{ route('users.update', $user->Id) }}">
     @csrf
     @method('PUT')
 </form>
 ```
 
+Hasło jest zapisywane w bazie jako hash.
+
 ---
 
-## 33. Dziennik pracy
+## 35. Dziennik pracy
 
 ### Krok 1 - utworzenie projektu Laravel
 
@@ -1449,8 +1481,6 @@ http://127.0.0.1:8000
 ### Krok 2 - przygotowanie projektu
 
 Przygotowałem czysty projekt Laravel do dalszej pracy.
-
-Na tym etapie projekt zawierał podstawową strukturę katalogów Laravel.
 
 ### Krok 3 - baza danych
 
@@ -1482,22 +1512,6 @@ OrderItems
 
 Zastosowałem klucze obce między tabelami oraz relację wiele-do-wielu między produktami i akcesoriami.
 
-Relacja wiele-do-wielu jest wykonana przez tabelę:
-
-```txt
-ProductAccessories
-```
-
-Dodałem też przykładowe dane startowe:
-
-```txt
-- użytkownik testowy,
-- kategorie produktów,
-- produkty,
-- akcesoria,
-- powiązania produktów z akcesoriami.
-```
-
 ### Krok 4 - modele Laravel
 
 Dodałem modele Laravel dla tabel z bazy danych.
@@ -1519,31 +1533,7 @@ Order
 OrderItem
 ```
 
-W modelach ustawiłem nazwy tabel, klucze główne oraz pola dat.
-
-Dodałem też relacje między modelami:
-
-```txt
-Category -> Products
-Product -> Category
-Product -> Accessories
-Accessory -> Products
-User -> Orders
-Order -> User
-Order -> OrderItems
-OrderItem -> Order
-OrderItem -> Product
-```
-
-Najważniejszą relacją jest relacja wiele-do-wielu między produktami i akcesoriami.
-
-Ta relacja jest obsługiwana przez tabelę:
-
-```txt
-ProductAccessories
-```
-
-Na tym etapie projekt ma już przygotowaną warstwę modeli do dalszej pracy z serwisami i kontrolerami.
+W modelach ustawiłem nazwy tabel, klucze główne, pola dat oraz relacje.
 
 ### Krok 5 - serwisy Laravel
 
@@ -1566,42 +1556,6 @@ AuthService
 OrderService
 OrderItemService
 ```
-
-W serwisach dodałem metody do:
-
-```txt
-- pobierania danych,
-- wyszukiwania danych,
-- dodawania rekordów,
-- edycji rekordów,
-- dezaktywacji rekordów,
-- walidacji formularzy,
-- obsługi logowania,
-- obsługi rejestracji,
-- obsługi zamówień z koszyka.
-```
-
-Przykład dezaktywacji rekordu:
-
-```php
-$model->IsActive = 0;
-$model->EditDateTime = now();
-$model->save();
-```
-
-Przykład hashowania hasła:
-
-```php
-Hash::make($request->input('Password'))
-```
-
-Przykład sprawdzania hasła przy logowaniu:
-
-```php
-Hash::check($request->input('Password'), $user->Password)
-```
-
-Na tym etapie projekt ma przygotowane modele i serwisy.
 
 ### Krok 6 - kontrolery Laravel
 
@@ -1627,19 +1581,6 @@ OrderController
 OrderItemController
 ```
 
-Kontrolery korzystają z serwisów przez konstruktor.
-
-Przykład:
-
-```php
-public function __construct(ProductService $productService)
-{
-    $this->productService = $productService;
-}
-```
-
-Dzięki temu kontroler nie musi zawierać całej logiki biznesowej, tylko wywołuje odpowiedni serwis.
-
 ### Krok 7 - trasy aplikacji
 
 Dodałem trasy aplikacji w pliku:
@@ -1650,31 +1591,7 @@ routes/web.php
 
 Trasy łączą adresy URL z kontrolerami.
 
-Dodałem trasy dla:
-
-```txt
-- strony głównej sklepu,
-- logowania,
-- rejestracji,
-- produktów,
-- kategorii,
-- akcesoriów,
-- użytkowników,
-- koszyka,
-- zamówień,
-- pozycji zamówień.
-```
-
-W trasach używam metod:
-
-```txt
-GET
-POST
-PUT
-DELETE
-```
-
-Dzięki temu projekt ma przygotowaną obsługę adresów URL.
+Dodałem trasy dla strony głównej, logowania, rejestracji, produktów, kategorii, akcesoriów, użytkowników, koszyka, zamówień i pozycji zamówień.
 
 ### Krok 8 - layout i strona główna sklepu
 
@@ -1684,15 +1601,11 @@ Dodałem główny layout Blade:
 resources/views/main.blade.php
 ```
 
-Layout zawiera menu, Bootstrap oraz miejsce na treść strony.
-
 Dodałem też widok strony głównej sklepu:
 
 ```txt
 resources/views/shop/index.blade.php
 ```
-
-Na stronie głównej wyświetlam produkty z bazy danych oraz przycisk dodania produktu do koszyka.
 
 ### Krok 9 - logowanie, rejestracja i koszyk
 
@@ -1709,10 +1622,6 @@ Dodałem też widok koszyka:
 resources/views/cart/index.blade.php
 ```
 
-Widok koszyka pokazuje produkty zapisane w sesji oraz formularz złożenia zamówienia.
-
-Na tym etapie można już wejść na stronę główną, zalogować się, zarejestrować konto i przejść do koszyka.
-
 ### Krok 10 - poprawa widoku logowania
 
 Poprawiłem widok logowania:
@@ -1722,22 +1631,6 @@ resources/views/auth/login.blade.php
 ```
 
 Usunąłem z widoku logowania wyświetlanie danych testowych.
-
-Zmieniłem też placeholdery pól formularza.
-
-W polu loginu jest placeholder:
-
-```txt
-Login
-```
-
-W polu hasła jest placeholder:
-
-```txt
-Hasło
-```
-
-Dzięki temu formularz logowania wygląda bardziej neutralnie i nie pokazuje przykładowych danych użytkownikowi.
 
 ### Krok 11 - widoki produktów
 
@@ -1749,13 +1642,7 @@ resources/views/products/create.blade.php
 resources/views/products/edit.blade.php
 ```
 
-Widok listy produktów pokazuje produkty w tabeli oraz pozwala je wyszukiwać.
-
-Widok dodawania produktu pozwala dodać nowy produkt, wybrać kategorię i przypisać akcesoria.
-
-Widok edycji produktu pozwala zmienić dane produktu oraz jego akcesoria.
-
-Na tym etapie działa już część CRUD dla produktów.
+Na tym etapie działa część CRUD dla produktów.
 
 ### Krok 12 - widoki kategorii
 
@@ -1767,13 +1654,7 @@ resources/views/categories/create.blade.php
 resources/views/categories/edit.blade.php
 ```
 
-Widok listy kategorii pokazuje kategorie w tabeli oraz pozwala je wyszukiwać.
-
-Widok dodawania kategorii pozwala dodać nową kategorię.
-
-Widok edycji kategorii pozwala zmienić nazwę i opis kategorii.
-
-Na tym etapie działa już część CRUD dla kategorii.
+Na tym etapie działa część CRUD dla kategorii.
 
 ### Krok 13 - widoki akcesoriów
 
@@ -1785,17 +1666,29 @@ resources/views/accessories/create.blade.php
 resources/views/accessories/edit.blade.php
 ```
 
-Widok listy akcesoriów pokazuje akcesoria w tabeli oraz pozwala je wyszukiwać.
+Na tym etapie działa część CRUD dla akcesoriów.
 
-Widok dodawania akcesorium pozwala dodać nazwę, opis i cenę.
+### Krok 14 - widoki użytkowników
 
-Widok edycji akcesorium pozwala zmienić nazwę, opis i cenę.
+Dodałem widoki CRUD dla użytkowników:
 
-Na tym etapie działa już część CRUD dla akcesoriów.
+```txt
+resources/views/users/index.blade.php
+resources/views/users/create.blade.php
+resources/views/users/edit.blade.php
+```
+
+Widok listy użytkowników pokazuje użytkowników w tabeli i nie pokazuje haseł.
+
+Widok dodawania użytkownika pozwala utworzyć nowego użytkownika.
+
+Widok edycji użytkownika pozwala zmienić nazwę, login oraz opcjonalnie hasło.
+
+Na tym etapie działa część CRUD dla użytkowników.
 
 ---
 
-## 34. Jak wgrać bazę danych
+## 36. Jak wgrać bazę danych
 
 W XAMPP trzeba uruchomić:
 
@@ -1824,7 +1717,7 @@ pzsi-druk-3d
 
 ---
 
-## 35. Jak sprawdzić trasy
+## 37. Jak sprawdzić trasy
 
 Po dodaniu tras można sprawdzić ich listę komendą:
 
@@ -1849,7 +1742,7 @@ order-items
 
 ---
 
-## 36. Jak uruchomić projekt
+## 38. Jak uruchomić projekt
 
 W terminalu trzeba wejść do katalogu projektu:
 
@@ -1881,26 +1774,25 @@ Adres lokalny aplikacji:
 http://127.0.0.1:8000
 ```
 
-Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w część paneli administracyjnych, ponieważ widoki zamówień, użytkowników i pozycji zamówień będą dodane w kolejnych krokach.
+Na tym etapie mogą jeszcze pojawić się błędy brakujących widoków przy wejściu w zamówienia i pozycje zamówień, ponieważ te widoki będą dodane w kolejnych krokach.
 
 ---
 
-## 37. Następny krok
+## 39. Następny krok
 
-Następnie zostaną przygotowane widoki CRUD dla użytkowników.
+Następnie zostaną przygotowane widoki dla zamówień.
 
 Widoki będą znajdować się w katalogu:
 
 ```txt
-resources/views/users
+resources/views/orders
 ```
 
 Planowane pliki:
 
 ```txt
 index.blade.php
-create.blade.php
 edit.blade.php
 ```
 
-Po dodaniu tych widoków będzie można wyświetlać, dodawać, edytować i dezaktywować użytkowników.
+Po dodaniu tych widoków będzie można wyświetlać zamówienia, edytować status zamówienia i dezaktywować zamówienia.
