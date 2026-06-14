@@ -27,9 +27,11 @@ class OrderController extends Controller
     public function edit(int $id)
     {
         $order = $this->orderService->getById($id);
+        $products = $this->orderService->getProductsForOrderEdit();
 
         return view('orders.edit', [
-            'order' => $order
+            'order' => $order,
+            'products' => $products
         ]);
     }
 
@@ -37,8 +39,40 @@ class OrderController extends Controller
     {
         $this->orderService->update($request, $id);
 
-        return redirect()->route('orders.index')
-            ->with('success', 'Zamówienie zostało zaktualizowane.');
+        return redirect()->route('orders.edit', $id)
+            ->with('success', 'Status zamówienia został zaktualizowany.');
+    }
+
+    public function addItem(Request $request, int $orderId)
+    {
+        $this->orderService->addItem($request, $orderId);
+
+        return redirect()->route('orders.edit', $orderId)
+            ->with('success', 'Produkt został dodany do zamówienia.');
+    }
+
+    public function increaseItem(int $orderId, int $itemId)
+    {
+        $this->orderService->increaseItem($orderId, $itemId);
+
+        return redirect()->route('orders.edit', $orderId)
+            ->with('success', 'Ilość produktu w zamówieniu została zwiększona.');
+    }
+
+    public function decreaseItem(int $orderId, int $itemId)
+    {
+        $this->orderService->decreaseItem($orderId, $itemId);
+
+        return redirect()->route('orders.edit', $orderId)
+            ->with('success', 'Ilość produktu w zamówieniu została zmniejszona.');
+    }
+
+    public function deleteItem(int $orderId, int $itemId)
+    {
+        $this->orderService->deleteItem($orderId, $itemId);
+
+        return redirect()->route('orders.edit', $orderId)
+            ->with('success', 'Pozycja zamówienia została usunięta.');
     }
 
     public function delete(int $id)

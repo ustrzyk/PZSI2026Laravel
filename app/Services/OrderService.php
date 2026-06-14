@@ -7,7 +7,6 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -17,25 +16,6 @@ class OrderService
     {
         $query = Order::with(['user', 'items.product'])
             ->where('IsActive', 1);
-
-        if ($request->query('search')) {
-            $query->where('CustomerName', 'like', '%' . $request->query('search') . '%');
-        }
-
-        return $query->get();
-    }
-
-    public function getById(int $id): Order
-    {
-        return Order::with(['user', 'items.product'])->findOrFail($id);
-    }
-
-    public function getForCurrentUser(Request $request): LengthAwarePaginator
-    {
-        // pobieram tylko zamówienia aktualnie zalogowanego użytkownika
-        $query = Order::with(['items.product'])
-            ->where('IsActive', 1)
-            ->where('UserId', session('user_id'));
 
         if ($request->query('search')) {
             $search = $request->query('search');
@@ -49,18 +29,21 @@ class OrderService
             });
         }
 
-        return $query->orderBy('CreationDateTime', 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        return $query->orderBy('CreationDateTime', 'desc')->get();
     }
 
-    public function getForCurrentUserById(int $id): Order
+    public function getById(int $id): Order
     {
-        // zabezpieczenie: klient nie może podejrzeć cudzego zamówienia
-        return Order::with(['items.product'])
-            ->where('IsActive', 1)
-            ->where('UserId', session('user_id'))
+        return Order::with(['user', 'items.product.category'])
             ->findOrFail($id);
+    }
+
+    public function getProductsForOrderEdit(): Collection
+    {
+        return Product::with('category')
+            ->where('IsActive', 1)
+            ->orderBy('Name')
+            ->get();
     }
 
     public function createFromCart(Request $request): void
@@ -92,7 +75,6 @@ class OrderService
                     ]);
                 }
 
-                // blokuję produkt na czas tworzenia zamówienia
                 $product = Product::where('IsActive', 1)
                     ->lockForUpdate()
                     ->find($productId);
@@ -155,7 +137,6 @@ class OrderService
                 $item->IsActive = 1;
                 $item->save();
 
-                // po zakupie zmniejszam stan magazynowy
                 $product->Stock = $product->Stock - $quantity;
                 $product->EditDateTime = now();
                 $product->save();
@@ -177,11 +158,176 @@ class OrderService
         $model->save();
     }
 
+    public function addItem(Request $request, int $orderId): void
+    {
+        $request->validate([
+            'ProductId' => ['required', 'integer', 'exists:Products,Id'],
+            'Quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        DB::transaction(function () use ($request, $orderId) {
+            $order = Order::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            $product = Product::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($request->input('ProductId'));
+
+            $quantity = (int) $request->input('Quantity');
+
+            if ($product->Stock < $quantity) {
+                throw ValidationException::withMessages([
+                    'stock' => 'Nie można dodać produktu "' . $product->Name . '", ponieważ w magazynie jest tylko ' . $product->Stock . ' szt.'
+                ]);
+            }
+
+            $existingItem = OrderItem::where('OrderId', $order->Id)
+                ->where('ProductId', $product->Id)
+                ->where('IsActive', 1)
+                ->lockForUpdate()
+                ->first();
+
+            if ($existingItem) {
+                $existingItem->Quantity = $existingItem->Quantity + $quantity;
+                $existingItem->EditDateTime = now();
+                $existingItem->save();
+            } else {
+                $item = new OrderItem();
+                $item->OrderId = $order->Id;
+                $item->ProductId = $product->Id;
+                $item->Quantity = $quantity;
+                $item->Price = $product->Price;
+                $item->CreationDateTime = now();
+                $item->EditDateTime = now();
+                $item->IsActive = 1;
+                $item->save();
+            }
+
+            $product->Stock = $product->Stock - $quantity;
+            $product->EditDateTime = now();
+            $product->save();
+
+            $this->recalculateTotal($order->Id);
+        });
+    }
+
+    public function increaseItem(int $orderId, int $itemId): void
+    {
+        DB::transaction(function () use ($orderId, $itemId) {
+            $order = Order::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            $item = OrderItem::where('OrderId', $order->Id)
+                ->where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($itemId);
+
+            $product = Product::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($item->ProductId);
+
+            if ($product->Stock <= 0) {
+                throw ValidationException::withMessages([
+                    'stock' => 'Nie można zwiększyć ilości produktu "' . $product->Name . '", ponieważ nie ma go w magazynie.'
+                ]);
+            }
+
+            $item->Quantity = $item->Quantity + 1;
+            $item->EditDateTime = now();
+            $item->save();
+
+            $product->Stock = $product->Stock - 1;
+            $product->EditDateTime = now();
+            $product->save();
+
+            $this->recalculateTotal($order->Id);
+        });
+    }
+
+    public function decreaseItem(int $orderId, int $itemId): void
+    {
+        DB::transaction(function () use ($orderId, $itemId) {
+            $order = Order::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            $item = OrderItem::where('OrderId', $order->Id)
+                ->where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($itemId);
+
+            $product = Product::lockForUpdate()
+                ->findOrFail($item->ProductId);
+
+            if ($item->Quantity > 1) {
+                $item->Quantity = $item->Quantity - 1;
+                $item->EditDateTime = now();
+                $item->save();
+
+                $product->Stock = $product->Stock + 1;
+                $product->EditDateTime = now();
+                $product->save();
+            } else {
+                $item->IsActive = 0;
+                $item->EditDateTime = now();
+                $item->save();
+
+                $product->Stock = $product->Stock + 1;
+                $product->EditDateTime = now();
+                $product->save();
+            }
+
+            $this->recalculateTotal($order->Id);
+        });
+    }
+
+    public function deleteItem(int $orderId, int $itemId): void
+    {
+        DB::transaction(function () use ($orderId, $itemId) {
+            $order = Order::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($orderId);
+
+            $item = OrderItem::where('OrderId', $order->Id)
+                ->where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($itemId);
+
+            $product = Product::lockForUpdate()
+                ->findOrFail($item->ProductId);
+
+            $product->Stock = $product->Stock + $item->Quantity;
+            $product->EditDateTime = now();
+            $product->save();
+
+            $item->IsActive = 0;
+            $item->EditDateTime = now();
+            $item->save();
+
+            $this->recalculateTotal($order->Id);
+        });
+    }
+
     public function delete(int $id): void
     {
         $model = Order::findOrFail($id);
         $model->IsActive = 0;
         $model->EditDateTime = now();
         $model->save();
+    }
+
+    private function recalculateTotal(int $orderId): void
+    {
+        $order = Order::findOrFail($orderId);
+
+        $total = OrderItem::where('OrderId', $orderId)
+            ->where('IsActive', 1)
+            ->sum(DB::raw('Price * Quantity'));
+
+        $order->TotalPrice = $total;
+        $order->EditDateTime = now();
+        $order->save();
     }
 }

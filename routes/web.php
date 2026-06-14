@@ -69,6 +69,11 @@ Route::middleware('admin')->group(function () {
     Route::put('/orders/edit/{id}', [OrderController::class, 'update'])->name('orders.update');
     Route::delete('/orders/delete/{id}', [OrderController::class, 'delete'])->name('orders.delete');
 
+    Route::post('/orders/{orderId}/items/add', [OrderController::class, 'addItem'])->name('orders.items.add');
+    Route::post('/orders/{orderId}/items/{itemId}/increase', [OrderController::class, 'increaseItem'])->name('orders.items.increase');
+    Route::post('/orders/{orderId}/items/{itemId}/decrease', [OrderController::class, 'decreaseItem'])->name('orders.items.decrease');
+    Route::delete('/orders/{orderId}/items/{itemId}/delete', [OrderController::class, 'deleteItem'])->name('orders.items.delete');
+
     Route::get('/order-items', [OrderItemController::class, 'index'])->name('order-items.index');
     Route::get('/order-items/create', [OrderItemController::class, 'create'])->name('order-items.create');
     Route::post('/order-items/create', [OrderItemController::class, 'store'])->name('order-items.store');
