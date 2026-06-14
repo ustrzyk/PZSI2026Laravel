@@ -26,7 +26,10 @@ class ProductService
     {
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1)
-            ->where('IsPromoted', 1);
+            ->where('IsPromoted', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('IsActive', 1);
+            });
 
         if ($request->query('search')) {
             $query->where('Name', 'like', '%' . $request->query('search') . '%');
@@ -45,7 +48,10 @@ class ProductService
     {
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1)
-            ->where('CategoryId', $categoryId);
+            ->where('CategoryId', $categoryId)
+            ->whereHas('category', function ($q) {
+                $q->where('IsActive', 1);
+            });
 
         if ($request->query('search')) {
             $query->where('Name', 'like', '%' . $request->query('search') . '%');
@@ -59,7 +65,10 @@ class ProductService
     public function getForShop(Request $request): LengthAwarePaginator
     {
         $query = Product::with(['category', 'accessories'])
-            ->where('IsActive', 1);
+            ->where('IsActive', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('IsActive', 1);
+            });
 
         if ($request->query('search')) {
             $query->where('Name', 'like', '%' . $request->query('search') . '%');
@@ -83,6 +92,9 @@ class ProductService
     {
         return Product::with(['category', 'accessories'])
             ->where('IsActive', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('IsActive', 1);
+            })
             ->findOrFail($id);
     }
 

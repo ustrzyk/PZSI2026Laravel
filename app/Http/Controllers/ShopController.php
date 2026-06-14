@@ -19,7 +19,6 @@ class ShopController extends Controller
 
     public function index(Request $request)
     {
-        // strona główna sklepu pokazuje kategorie i produkty promowane
         $promotedProducts = $this->productService->getPromotedForShop($request);
         $categories = $this->categoryService->getActive();
 
@@ -33,12 +32,9 @@ class ShopController extends Controller
 
     public function category(Request $request, int $id)
     {
-        // strona jednej kategorii pokazuje tylko produkty z tej kategorii
+        $currentCategory = $this->categoryService->getActiveByIdForShop($id);
         $products = $this->productService->getForCategory($request, $id);
         $categories = $this->categoryService->getActive();
-        $currentCategory = $categories->firstWhere('Id', $id);
-
-        abort_if(!$currentCategory, 404);
 
         return view('shop.category', [
             'products' => $products,
@@ -50,7 +46,6 @@ class ShopController extends Controller
 
     public function show(int $id)
     {
-        // szczegóły jednego aktywnego produktu
         $product = $this->productService->getActiveByIdForShop($id);
 
         return view('shop.show', [

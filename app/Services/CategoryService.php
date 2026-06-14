@@ -28,6 +28,12 @@ class CategoryService
             ->get();
     }
 
+    public function getActiveByIdForShop(int $id): Category
+    {
+        return Category::where('IsActive', 1)
+            ->findOrFail($id);
+    }
+
     public function getById(int $id): Category
     {
         return Category::findOrFail($id);

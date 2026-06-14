@@ -219,6 +219,8 @@ my-orders
 my-orders/{id}
 ```
 
+Strona sklepu pokazuje tylko aktywne produkty z aktywnych kategorii.
+
 ---
 
 ## 9. Panel administratora
@@ -269,6 +271,8 @@ Aktywne
 Ukryte
 Wszystkie
 ```
+
+Ukryta kategoria nie jest widoczna w sklepie. Produkty przypisane do ukrytej kategorii też nie są widoczne po stronie klienta.
 
 ---
 
@@ -361,6 +365,8 @@ Na stronie szczegółów produktu widoczne są:
 - pasujące akcesoria.
 ```
 
+Strona szczegółów produktu działa tylko dla aktywnego produktu z aktywnej kategorii.
+
 ---
 
 ## 16. Produkty promowane
@@ -377,6 +383,8 @@ Wartości:
 IsPromoted = 1 - produkt promowany
 IsPromoted = 0 - produkt zwykły
 ```
+
+Produkty promowane są widoczne w sklepie tylko wtedy, gdy produkt i jego kategoria są aktywne.
 
 ---
 
@@ -469,6 +477,7 @@ http://127.0.0.1:8000
 - CRUD,
 - filtry widoczności,
 - ukrywanie i przywracanie,
+- ukrycie kategorii i sprawdzenie produktów w sklepie,
 - blokowanie i odblokowanie użytkownika,
 - statusy zamówień,
 - anulowanie i przywracanie zamówień.
