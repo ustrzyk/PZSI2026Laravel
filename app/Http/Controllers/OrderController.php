@@ -52,6 +52,14 @@ class OrderController extends Controller
             ->with('success', 'Zamówienie zostało anulowane.');
     }
 
+    public function restore(int $id)
+    {
+        $this->orderService->restore($id);
+
+        return redirect()->back()
+            ->with('success', 'Zamówienie zostało przywrócone.');
+    }
+
     public function addItem(Request $request, int $orderId)
     {
         $this->orderService->addItem($request, $orderId);

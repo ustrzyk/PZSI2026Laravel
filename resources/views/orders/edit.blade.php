@@ -87,9 +87,21 @@
 
                 <div class="card-body">
                     @if($isCancelled)
-                        <span class="badge bg-danger">
-                            Anulowane
-                        </span>
+                        <div class="mb-3">
+                            <span class="badge bg-danger">
+                                Anulowane
+                            </span>
+                        </div>
+
+                        <form method="POST"
+                              action="{{ route('orders.restore', $order->Id) }}"
+                              onsubmit="return confirm('Przywrócić zamówienie?');">
+                            @csrf
+
+                            <button type="submit" class="btn btn-outline-success">
+                                Przywróć zamówienie
+                            </button>
+                        </form>
                     @else
                         <form method="POST" action="{{ route('orders.update', $order->Id) }}" class="mb-3">
                             @csrf

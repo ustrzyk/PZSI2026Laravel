@@ -68,6 +68,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/orders/edit/{id}', [OrderController::class, 'edit'])->name('orders.edit');
     Route::put('/orders/edit/{id}', [OrderController::class, 'update'])->name('orders.update');
     Route::post('/orders/cancel/{id}', [OrderController::class, 'cancel'])->name('orders.cancel');
+    Route::post('/orders/restore/{id}', [OrderController::class, 'restore'])->name('orders.restore');
     Route::delete('/orders/delete/{id}', [OrderController::class, 'delete'])->name('orders.delete');
 
     Route::post('/orders/{orderId}/items/add', [OrderController::class, 'addItem'])->name('orders.items.add');

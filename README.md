@@ -257,9 +257,11 @@ Lista zamówień administratora ma:
 ```txt
 - wyszukiwarkę,
 - filtr statusu,
+- statusy po polsku,
 - podgląd pozycji,
 - przejście do edycji,
 - anulowanie,
+- przywracanie,
 - ukrywanie.
 ```
 
@@ -290,7 +292,8 @@ W edycji zamówienia administrator może:
 - zwiększyć ilość pozycji,
 - zmniejszyć ilość pozycji,
 - usunąć pozycję,
-- anulować zamówienie.
+- anulować zamówienie,
+- przywrócić anulowane zamówienie.
 ```
 
 Akcja `Ukryj` ustawia:
@@ -507,6 +510,8 @@ Warto sprawdzić:
 - czy działa filtr statusu w Moich zamówieniach,
 - czy status Anulowane wyświetla się po polsku,
 - czy działa edycja zamówienia z pozycjami,
+- czy działa anulowanie zamówienia,
+- czy działa przywracanie zamówienia,
 - czy działa ukrywanie zamówień,
 - czy klient widzi tylko swoje zamówienia,
 - czy klient nie ma dostępu do panelu admina,

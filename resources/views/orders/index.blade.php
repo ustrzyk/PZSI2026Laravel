@@ -109,7 +109,18 @@
                             Edytuj
                         </a>
 
-                        @if($order->Status != 'Cancelled')
+                        @if($order->Status == 'Cancelled')
+                            <form method="POST"
+                                  action="{{ route('orders.restore', $order->Id) }}"
+                                  class="me-2"
+                                  onsubmit="return confirm('Przywrócić zamówienie?');">
+                                @csrf
+
+                                <button class="btn btn-outline-success btn-sm" type="submit">
+                                    Przywróć
+                                </button>
+                            </form>
+                        @else
                             <form method="POST"
                                   action="{{ route('orders.cancel', $order->Id) }}"
                                   class="me-2"

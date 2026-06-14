@@ -250,6 +250,66 @@ class OrderService
         });
     }
 
+    public function restore(int $id): void
+    {
+        DB::transaction(function () use ($id) {
+            $order = Order::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            if ($order->Status != 'Cancelled') {
+                return;
+            }
+
+            $items = OrderItem::where('OrderId', $order->Id)
+                ->where('IsActive', 1)
+                ->lockForUpdate()
+                ->get();
+
+            if ($items->count() == 0) {
+                throw ValidationException::withMessages([
+                    'order' => 'Nie można przywrócić zamówienia bez pozycji.'
+                ]);
+            }
+
+            $productsToUpdate = [];
+
+            foreach ($items as $item) {
+                $product = Product::lockForUpdate()->find($item->ProductId);
+
+                if (!$product || (int) $product->IsActive !== 1) {
+                    throw ValidationException::withMessages([
+                        'product' => 'Jeden z produktów w zamówieniu nie jest aktywny.'
+                    ]);
+                }
+
+                if ($product->Stock < $item->Quantity) {
+                    throw ValidationException::withMessages([
+                        'stock' => 'Brak wystarczającej ilości produktu "' . $product->Name . '" w magazynie.'
+                    ]);
+                }
+
+                $productsToUpdate[] = [
+                    'product' => $product,
+                    'quantity' => $item->Quantity,
+                ];
+            }
+
+            foreach ($productsToUpdate as $productData) {
+                $product = $productData['product'];
+                $quantity = $productData['quantity'];
+
+                $product->Stock = $product->Stock - $quantity;
+                $product->EditDateTime = now();
+                $product->save();
+            }
+
+            $order->Status = 'New';
+            $order->EditDateTime = now();
+            $order->save();
+        });
+    }
+
     public function addItem(Request $request, int $orderId): void
     {
         $request->validate([
