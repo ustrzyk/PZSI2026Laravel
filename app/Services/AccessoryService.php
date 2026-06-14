@@ -10,13 +10,15 @@ class AccessoryService
 {
     public function getAll(Request $request): Collection
     {
-        $query = Accessory::where('IsActive', 1);
+        $query = Accessory::query();
+
+        $this->applyVisibilityFilter($query, $request);
 
         if ($request->query('search')) {
             $query->where('Name', 'like', '%' . $request->query('search') . '%');
         }
 
-        return $query->get();
+        return $query->orderBy('Name')->get();
     }
 
     public function getById(int $id): Accessory
@@ -64,5 +66,26 @@ class AccessoryService
         $model->IsActive = 0;
         $model->EditDateTime = now();
         $model->save();
+    }
+
+    public function restore(int $id): void
+    {
+        $model = Accessory::findOrFail($id);
+        $model->IsActive = 1;
+        $model->EditDateTime = now();
+        $model->save();
+    }
+
+    private function applyVisibilityFilter($query, Request $request): void
+    {
+        $visibility = $request->query('visibility', 'active');
+
+        if ($visibility == 'hidden') {
+            $query->where('IsActive', 0);
+        } elseif ($visibility == 'all') {
+            return;
+        } else {
+            $query->where('IsActive', 1);
+        }
     }
 }

@@ -20,7 +20,8 @@ class AccessoryController extends Controller
 
         return view('accessories.index', [
             'accessories' => $accessories,
-            'search' => $request->query('search')
+            'search' => $request->query('search'),
+            'visibility' => $request->query('visibility', 'active')
         ]);
     }
 
@@ -59,6 +60,14 @@ class AccessoryController extends Controller
         $this->accessoryService->delete($id);
 
         return redirect()->route('accessories.index')
-            ->with('success', 'Akcesorium zostało dezaktywowane.');
+            ->with('success', 'Akcesorium zostało ukryte.');
+    }
+
+    public function restore(int $id)
+    {
+        $this->accessoryService->restore($id);
+
+        return redirect()->route('accessories.index', ['visibility' => 'hidden'])
+            ->with('success', 'Akcesorium zostało przywrócone.');
     }
 }

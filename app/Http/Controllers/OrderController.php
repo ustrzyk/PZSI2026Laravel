@@ -21,7 +21,8 @@ class OrderController extends Controller
         return view('orders.index', [
             'orders' => $orders,
             'search' => $request->query('search'),
-            'status' => $request->query('status')
+            'status' => $request->query('status'),
+            'visibility' => $request->query('visibility', 'active')
         ]);
     }
 
@@ -58,6 +59,14 @@ class OrderController extends Controller
 
         return redirect()->back()
             ->with('success', 'Zamówienie zostało przywrócone.');
+    }
+
+    public function restoreHidden(int $id)
+    {
+        $this->orderService->restoreHidden($id);
+
+        return redirect()->route('orders.index', ['visibility' => 'hidden'])
+            ->with('success', 'Zamówienie zostało przywrócone na listę.');
     }
 
     public function addItem(Request $request, int $orderId)

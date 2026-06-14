@@ -45,6 +45,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/products/edit/{id}', [ProductController::class, 'edit'])->name('products.edit');
     Route::put('/products/edit/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/products/delete/{id}', [ProductController::class, 'delete'])->name('products.delete');
+    Route::post('/products/restore/{id}', [ProductController::class, 'restore'])->name('products.restore');
 
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
@@ -52,6 +53,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/categories/edit/{id}', [CategoryController::class, 'edit'])->name('categories.edit');
     Route::put('/categories/edit/{id}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/delete/{id}', [CategoryController::class, 'delete'])->name('categories.delete');
+    Route::post('/categories/restore/{id}', [CategoryController::class, 'restore'])->name('categories.restore');
 
     Route::get('/accessories', [AccessoryController::class, 'index'])->name('accessories.index');
     Route::get('/accessories/create', [AccessoryController::class, 'create'])->name('accessories.create');
@@ -59,6 +61,7 @@ Route::middleware('admin')->group(function () {
     Route::get('/accessories/edit/{id}', [AccessoryController::class, 'edit'])->name('accessories.edit');
     Route::put('/accessories/edit/{id}', [AccessoryController::class, 'update'])->name('accessories.update');
     Route::delete('/accessories/delete/{id}', [AccessoryController::class, 'delete'])->name('accessories.delete');
+    Route::post('/accessories/restore/{id}', [AccessoryController::class, 'restore'])->name('accessories.restore');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
@@ -66,12 +69,14 @@ Route::middleware('admin')->group(function () {
     Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/edit/{id}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/delete/{id}', [UserController::class, 'delete'])->name('users.delete');
+    Route::post('/users/restore/{id}', [UserController::class, 'restore'])->name('users.restore');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/edit/{id}', [OrderController::class, 'edit'])->name('orders.edit');
     Route::put('/orders/edit/{id}', [OrderController::class, 'update'])->name('orders.update');
     Route::post('/orders/cancel/{id}', [OrderController::class, 'cancel'])->name('orders.cancel');
     Route::post('/orders/restore/{id}', [OrderController::class, 'restore'])->name('orders.restore');
+    Route::post('/orders/restore-hidden/{id}', [OrderController::class, 'restoreHidden'])->name('orders.restore-hidden');
     Route::delete('/orders/delete/{id}', [OrderController::class, 'delete'])->name('orders.delete');
 
     Route::post('/orders/{orderId}/items/add', [OrderController::class, 'addItem'])->name('orders.items.add');

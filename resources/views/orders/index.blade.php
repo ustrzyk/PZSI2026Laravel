@@ -28,16 +28,13 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">
-            Filtry
-        </div>
+        <div class="card-header">Filtry</div>
 
         <div class="card-body">
             <form method="GET" action="{{ route('orders.index') }}">
                 <div class="row">
-                    <div class="col-md-5 mb-3">
+                    <div class="col-md-4 mb-3">
                         <label class="form-label">Szukaj</label>
-
                         <input type="text"
                                name="search"
                                class="form-control"
@@ -45,42 +42,30 @@
                                value="{{ $search }}">
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label">Status</label>
-
                         <select name="status" class="form-control">
                             <option value="">Wszystkie</option>
+                            <option value="New" @if($status == 'New') selected @endif>Nowe</option>
+                            <option value="Paid" @if($status == 'Paid') selected @endif>Opłacone</option>
+                            <option value="Sent" @if($status == 'Sent') selected @endif>Wysłane</option>
+                            <option value="Finished" @if($status == 'Finished') selected @endif>Zakończone</option>
+                            <option value="Cancelled" @if($status == 'Cancelled') selected @endif>Anulowane</option>
+                        </select>
+                    </div>
 
-                            <option value="New" @if($status == 'New') selected @endif>
-                                Nowe
-                            </option>
-
-                            <option value="Paid" @if($status == 'Paid') selected @endif>
-                                Opłacone
-                            </option>
-
-                            <option value="Sent" @if($status == 'Sent') selected @endif>
-                                Wysłane
-                            </option>
-
-                            <option value="Finished" @if($status == 'Finished') selected @endif>
-                                Zakończone
-                            </option>
-
-                            <option value="Cancelled" @if($status == 'Cancelled') selected @endif>
-                                Anulowane
-                            </option>
+                    <div class="col-md-2 mb-3">
+                        <label class="form-label">Widoczność</label>
+                        <select name="visibility" class="form-control">
+                            <option value="active" @if($visibility == 'active') selected @endif>Aktywne</option>
+                            <option value="hidden" @if($visibility == 'hidden') selected @endif>Ukryte</option>
+                            <option value="all" @if($visibility == 'all') selected @endif>Wszystkie</option>
                         </select>
                     </div>
 
                     <div class="col-md-3 mb-3 d-flex align-items-end">
-                        <button class="btn btn-dark w-100 me-2" type="submit">
-                            Szukaj
-                        </button>
-
-                        <a href="{{ route('orders.index') }}" class="btn btn-secondary w-100">
-                            Wyczyść
-                        </a>
+                        <button class="btn btn-dark w-100 me-2" type="submit">Szukaj</button>
+                        <a href="{{ route('orders.index') }}" class="btn btn-secondary w-100">Wyczyść</a>
                     </div>
                 </div>
             </form>
@@ -101,48 +86,63 @@
                         <span class="badge {{ $statusClasses[$order->Status] ?? 'bg-secondary' }} ms-2">
                             {{ $statusNames[$order->Status] ?? $order->Status }}
                         </span>
+
+                        @if((int)$order->IsActive == 0)
+                            <span class="badge bg-secondary ms-1">Ukryte</span>
+                        @endif
                     </div>
 
                     <div class="d-flex">
-                        <a href="{{ route('orders.edit', $order->Id) }}"
-                           class="btn btn-warning btn-sm me-2">
-                            Edytuj
-                        </a>
+                        @if((int)$order->IsActive == 1)
+                            <a href="{{ route('orders.edit', $order->Id) }}"
+                               class="btn btn-warning btn-sm me-2">
+                                Edytuj
+                            </a>
 
-                        @if($order->Status == 'Cancelled')
+                            @if($order->Status == 'Cancelled')
+                                <form method="POST"
+                                      action="{{ route('orders.restore', $order->Id) }}"
+                                      class="me-2"
+                                      onsubmit="return confirm('Przywrócić zamówienie?');">
+                                    @csrf
+
+                                    <button class="btn btn-outline-success btn-sm" type="submit">
+                                        Przywróć
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST"
+                                      action="{{ route('orders.cancel', $order->Id) }}"
+                                      class="me-2"
+                                      onsubmit="return confirm('Anulować zamówienie?');">
+                                    @csrf
+
+                                    <button class="btn btn-outline-danger btn-sm" type="submit">
+                                        Anuluj
+                                    </button>
+                                </form>
+                            @endif
+
                             <form method="POST"
-                                  action="{{ route('orders.restore', $order->Id) }}"
-                                  class="me-2"
-                                  onsubmit="return confirm('Przywrócić zamówienie?');">
+                                  action="{{ route('orders.delete', $order->Id) }}"
+                                  onsubmit="return confirm('Ukryć zamówienie?');">
                                 @csrf
+                                @method('DELETE')
 
-                                <button class="btn btn-outline-success btn-sm" type="submit">
-                                    Przywróć
+                                <button class="btn btn-danger btn-sm" type="submit">
+                                    Ukryj
                                 </button>
                             </form>
                         @else
                             <form method="POST"
-                                  action="{{ route('orders.cancel', $order->Id) }}"
-                                  class="me-2"
-                                  onsubmit="return confirm('Anulować zamówienie?');">
+                                  action="{{ route('orders.restore-hidden', $order->Id) }}">
                                 @csrf
 
-                                <button class="btn btn-outline-danger btn-sm" type="submit">
-                                    Anuluj
+                                <button class="btn btn-success btn-sm" type="submit">
+                                    Przywróć na listę
                                 </button>
                             </form>
                         @endif
-
-                        <form method="POST"
-                              action="{{ route('orders.delete', $order->Id) }}"
-                              onsubmit="return confirm('Ukryć zamówienie?');">
-                            @csrf
-                            @method('DELETE')
-
-                            <button class="btn btn-danger btn-sm" type="submit">
-                                Ukryj
-                            </button>
-                        </form>
                     </div>
                 </div>
 

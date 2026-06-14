@@ -11,20 +11,19 @@ class ProductService
 {
     public function getAll(Request $request): Collection
     {
-        // tu pobieram produkty do panelu admina
-        $query = Product::with(['category', 'accessories'])
-            ->where('IsActive', 1);
+        $query = Product::with(['category', 'accessories']);
+
+        $this->applyVisibilityFilter($query, $request);
 
         if ($request->query('search')) {
             $query->where('Name', 'like', '%' . $request->query('search') . '%');
         }
 
-        return $query->get();
+        return $query->orderBy('Name')->get();
     }
 
     public function getPromotedForShop(Request $request): Collection
     {
-        // tu pobieram tylko produkty promowane na stronę główną
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1)
             ->where('IsPromoted', 1);
@@ -44,7 +43,6 @@ class ProductService
 
     public function getForCategory(Request $request, int $categoryId): LengthAwarePaginator
     {
-        // tu pobieram produkty tylko z jednej kategorii
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1)
             ->where('CategoryId', $categoryId);
@@ -60,7 +58,6 @@ class ProductService
 
     public function getForShop(Request $request): LengthAwarePaginator
     {
-        // zostawiam tę metodę jako awaryjną listę produktów
         $query = Product::with(['category', 'accessories'])
             ->where('IsActive', 1);
 
@@ -79,13 +76,11 @@ class ProductService
 
     public function getById(int $id): Product
     {
-        // ta metoda jest używana w panelu admina
         return Product::with(['category', 'accessories'])->findOrFail($id);
     }
 
     public function getActiveByIdForShop(int $id): Product
     {
-        // ta metoda jest używana na publicznej stronie szczegółów produktu
         return Product::with(['category', 'accessories'])
             ->where('IsActive', 1)
             ->findOrFail($id);
@@ -93,7 +88,6 @@ class ProductService
 
     public function addToDb(Request $request): void
     {
-        // walidacja dla nowego produktu
         $request->validate([
             'Name' => ['required', 'string', 'max:150'],
             'Description' => ['required', 'string', 'min:5'],
@@ -123,7 +117,6 @@ class ProductService
 
     public function update(Request $request, int $id): void
     {
-        // tutaj aktualizuje produkt
         $request->validate([
             'Name' => ['required', 'string', 'max:150'],
             'Description' => ['required', 'string', 'min:5'],
@@ -151,10 +144,30 @@ class ProductService
 
     public function delete(int $id): void
     {
-        // nie kasuje z bazy, tylko chowam rekord
         $model = Product::findOrFail($id);
         $model->IsActive = 0;
         $model->EditDateTime = now();
         $model->save();
+    }
+
+    public function restore(int $id): void
+    {
+        $model = Product::findOrFail($id);
+        $model->IsActive = 1;
+        $model->EditDateTime = now();
+        $model->save();
+    }
+
+    private function applyVisibilityFilter($query, Request $request): void
+    {
+        $visibility = $request->query('visibility', 'active');
+
+        if ($visibility == 'hidden') {
+            $query->where('IsActive', 0);
+        } elseif ($visibility == 'all') {
+            return;
+        } else {
+            $query->where('IsActive', 1);
+        }
     }
 }

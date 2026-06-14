@@ -20,7 +20,8 @@ class UserController extends Controller
 
         return view('users.index', [
             'users' => $users,
-            'search' => $request->query('search')
+            'search' => $request->query('search'),
+            'visibility' => $request->query('visibility', 'active')
         ]);
     }
 
@@ -59,6 +60,14 @@ class UserController extends Controller
         $this->userService->delete($id);
 
         return redirect()->route('users.index')
-            ->with('success', 'Użytkownik został dezaktywowany.');
+            ->with('success', 'Użytkownik został zablokowany.');
+    }
+
+    public function restore(int $id)
+    {
+        $this->userService->restore($id);
+
+        return redirect()->route('users.index', ['visibility' => 'hidden'])
+            ->with('success', 'Użytkownik został odblokowany.');
     }
 }

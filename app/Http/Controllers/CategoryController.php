@@ -20,7 +20,8 @@ class CategoryController extends Controller
 
         return view('categories.index', [
             'categories' => $categories,
-            'search' => $request->query('search')
+            'search' => $request->query('search'),
+            'visibility' => $request->query('visibility', 'active')
         ]);
     }
 
@@ -59,6 +60,14 @@ class CategoryController extends Controller
         $this->categoryService->delete($id);
 
         return redirect()->route('categories.index')
-            ->with('success', 'Kategoria została dezaktywowana.');
+            ->with('success', 'Kategoria została ukryta.');
+    }
+
+    public function restore(int $id)
+    {
+        $this->categoryService->restore($id);
+
+        return redirect()->route('categories.index', ['visibility' => 'hidden'])
+            ->with('success', 'Kategoria została przywrócona.');
     }
 }

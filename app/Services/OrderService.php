@@ -15,8 +15,9 @@ class OrderService
 {
     public function getAll(Request $request): Collection
     {
-        $query = Order::with(['user', 'items.product'])
-            ->where('IsActive', 1);
+        $query = Order::with(['user', 'items.product']);
+
+        $this->applyVisibilityFilter($query, $request);
 
         if ($request->query('search')) {
             $search = $request->query('search');
@@ -310,6 +311,14 @@ class OrderService
         });
     }
 
+    public function restoreHidden(int $id): void
+    {
+        $model = Order::findOrFail($id);
+        $model->IsActive = 1;
+        $model->EditDateTime = now();
+        $model->save();
+    }
+
     public function addItem(Request $request, int $orderId): void
     {
         $request->validate([
@@ -513,5 +522,18 @@ class OrderService
             'anulowane', 'anulowany', 'cancelled', 'canceled' => 'Cancelled',
             default => null,
         };
+    }
+
+    private function applyVisibilityFilter($query, Request $request): void
+    {
+        $visibility = $request->query('visibility', 'active');
+
+        if ($visibility == 'hidden') {
+            $query->where('IsActive', 0);
+        } elseif ($visibility == 'all') {
+            return;
+        } else {
+            $query->where('IsActive', 1);
+        }
     }
 }

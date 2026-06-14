@@ -29,7 +29,8 @@ class ProductController extends Controller
 
         return view('products.index', [
             'products' => $products,
-            'search' => $request->query('search')
+            'search' => $request->query('search'),
+            'visibility' => $request->query('visibility', 'active')
         ]);
     }
 
@@ -78,6 +79,14 @@ class ProductController extends Controller
         $this->productService->delete($id);
 
         return redirect()->route('products.index')
-            ->with('success', 'Produkt został dezaktywowany.');
+            ->with('success', 'Produkt został ukryty.');
+    }
+
+    public function restore(int $id)
+    {
+        $this->productService->restore($id);
+
+        return redirect()->route('products.index', ['visibility' => 'hidden'])
+            ->with('success', 'Produkt został przywrócony.');
     }
 }

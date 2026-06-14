@@ -224,7 +224,35 @@ Panel administracyjny jest zabezpieczony middleware i dostępny tylko dla roli `
 
 ---
 
-## 10. Statusy zamówień
+## 10. Ukrywanie i przywracanie
+
+W panelu administratora można ukrywać i przywracać:
+
+```txt
+- produkty,
+- kategorie,
+- akcesoria,
+- zamówienia.
+```
+
+Użytkowników można:
+
+```txt
+- zablokować,
+- odblokować.
+```
+
+Listy w panelu mają filtr widoczności:
+
+```txt
+Aktywne
+Ukryte
+Wszystkie
+```
+
+---
+
+## 11. Statusy zamówień
 
 ```txt
 New       - Nowe
@@ -238,7 +266,7 @@ Statusy są wyświetlane po polsku w panelu administratora oraz w widoku klienta
 
 ---
 
-## 11. Zamówienia
+## 12. Zamówienia
 
 Administrator może:
 
@@ -248,7 +276,8 @@ Administrator może:
 - edytować pozycje zamówienia,
 - anulować zamówienie,
 - przywrócić anulowane zamówienie,
-- ukryć zamówienie.
+- ukryć zamówienie,
+- przywrócić ukryte zamówienie.
 ```
 
 Klient może:
@@ -261,7 +290,7 @@ Klient może:
 
 ---
 
-## 12. Koszyk
+## 13. Koszyk
 
 Koszyk jest przechowywany w sesji.
 
@@ -279,7 +308,7 @@ W górnym menu widoczny jest licznik produktów w koszyku.
 
 ---
 
-## 13. Magazyn
+## 14. Magazyn
 
 Produkty mają pole:
 
@@ -291,7 +320,7 @@ Produkt bez stanu magazynowego nie może zostać dodany do koszyka.
 
 ---
 
-## 14. Szczegóły produktu
+## 15. Szczegóły produktu
 
 Adres:
 
@@ -314,7 +343,7 @@ Na stronie szczegółów produktu widoczne są:
 
 ---
 
-## 15. Produkty promowane
+## 16. Produkty promowane
 
 Produkty mają pole:
 
@@ -331,7 +360,7 @@ IsPromoted = 0 - produkt zwykły
 
 ---
 
-## 16. Górne menu
+## 17. Górne menu
 
 Menu zawiera ikonki oraz tekst.
 
@@ -351,7 +380,7 @@ Dla administratora linki panelu są w rozwijanym menu.
 
 ---
 
-## 17. Ukrywanie rekordów
+## 18. Pole IsActive
 
 Rekordy są ukrywane przez pole:
 
@@ -368,7 +397,7 @@ IsActive = 0
 
 ---
 
-## 18. Struktura katalogów
+## 19. Struktura katalogów
 
 ```txt
 app/Models              - modele
@@ -382,7 +411,7 @@ database                - skrypt SQL
 
 ---
 
-## 19. Uruchomienie projektu
+## 20. Uruchomienie projektu
 
 ```bash
 cd /c/git/PZSI2026Laravel
@@ -401,7 +430,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 20. Test
+## 21. Test
 
 ```txt
 - strona główna,
@@ -415,6 +444,9 @@ http://127.0.0.1:8000
 - Moje zamówienia,
 - panel administratora,
 - CRUD,
+- filtry widoczności,
+- ukrywanie i przywracanie,
+- blokowanie i odblokowanie użytkownika,
 - statusy zamówień,
 - anulowanie i przywracanie zamówień.
 ```
