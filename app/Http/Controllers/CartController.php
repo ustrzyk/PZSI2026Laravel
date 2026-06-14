@@ -19,19 +19,40 @@ class CartController extends Controller
     {
         $cart = session('cart', []);
         $products = collect();
+        $unavailableProducts = collect();
+        $missingProductIds = collect();
         $total = 0;
         $hasStockError = false;
 
         if (count($cart) > 0) {
-            $products = Product::whereIn('Id', array_keys($cart))
-                ->where('IsActive', 1)
+            $allProducts = Product::with('category')
+                ->whereIn('Id', array_keys($cart))
+                ->orderBy('Name')
                 ->get();
 
-            foreach ($products as $product) {
+            $existingProductIds = $allProducts->pluck('Id')->toArray();
+            $missingProductIds = collect(array_diff(array_keys($cart), $existingProductIds));
+
+            if ($missingProductIds->count() > 0) {
+                $hasStockError = true;
+            }
+
+            foreach ($allProducts as $product) {
                 $quantity = $cart[$product->Id] ?? 0;
+
+                if (
+                    (int) $product->IsActive !== 1 ||
+                    !$product->category ||
+                    (int) $product->category->IsActive !== 1
+                ) {
+                    $unavailableProducts->push($product);
+                    $hasStockError = true;
+                    continue;
+                }
+
+                $products->push($product);
                 $total += $product->Price * $quantity;
 
-                // sprawdzam, czy w koszyku nie ma więcej sztuk niż w magazynie
                 if ($quantity > $product->Stock) {
                     $hasStockError = true;
                 }
@@ -41,6 +62,8 @@ class CartController extends Controller
         return view('cart.index', [
             'cart' => $cart,
             'products' => $products,
+            'unavailableProducts' => $unavailableProducts,
+            'missingProductIds' => $missingProductIds,
             'total' => $total,
             'hasStockError' => $hasStockError
         ]);
@@ -48,14 +71,17 @@ class CartController extends Controller
 
     public function add(int $id)
     {
-        // dodanie produktu z poziomu sklepu działa tak samo jak zwiększenie ilości
         return $this->increase($id);
     }
 
     public function increase(int $id)
     {
-        // pobieram tylko aktywny produkt
-        $product = Product::where('IsActive', 1)->findOrFail($id);
+        $product = Product::with('category')
+            ->where('IsActive', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('IsActive', 1);
+            })
+            ->findOrFail($id);
 
         if ($product->Stock <= 0) {
             return redirect()->back()
@@ -67,7 +93,6 @@ class CartController extends Controller
         $cart = session('cart', []);
         $currentQuantity = $cart[$product->Id] ?? 0;
 
-        // nie pozwalam dodać więcej niż jest w magazynie
         if ($currentQuantity >= $product->Stock) {
             return redirect()->back()
                 ->withErrors([

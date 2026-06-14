@@ -36,6 +36,12 @@ Skrypt SQL:
 database/pzsi-druk-3d.sql
 ```
 
+Dodatkowe dane testowe:
+
+```txt
+database/dodatkowe-dane.sql
+```
+
 Tabele:
 
 ```txt
@@ -276,45 +282,7 @@ Ukryta kategoria nie jest widoczna w sklepie. Produkty przypisane do ukrytej kat
 
 ---
 
-## 11. Statusy zamówień
-
-```txt
-New       - Nowe
-Paid      - Opłacone
-Sent      - Wysłane
-Finished  - Zakończone
-Cancelled - Anulowane
-```
-
-Statusy są wyświetlane po polsku w panelu administratora oraz w widoku klienta.
-
----
-
-## 12. Zamówienia
-
-Administrator może:
-
-```txt
-- filtrować zamówienia,
-- zmieniać status,
-- edytować pozycje zamówienia,
-- anulować zamówienie,
-- przywrócić anulowane zamówienie,
-- ukryć zamówienie,
-- przywrócić ukryte zamówienie.
-```
-
-Klient może:
-
-```txt
-- przeglądać swoje zamówienia,
-- filtrować swoje zamówienia,
-- sprawdzać szczegóły zamówienia.
-```
-
----
-
-## 13. Koszyk
+## 11. Koszyk i dostępność produktów
 
 Koszyk jest przechowywany w sesji.
 
@@ -328,7 +296,53 @@ Klient może:
 - złożyć zamówienie.
 ```
 
+Do koszyka można dodać tylko produkt, który jest aktywny i należy do aktywnej kategorii.
+
+Jeżeli produkt albo jego kategoria zostanie ukryta po dodaniu produktu do koszyka, koszyk pokaże produkt jako niedostępny i zablokuje złożenie zamówienia.
+
+Zamówienie można złożyć tylko z produktów aktywnych, dostępnych w magazynie i przypisanych do aktywnych kategorii.
+
 W górnym menu widoczny jest licznik produktów w koszyku.
+
+---
+
+## 12. Statusy zamówień
+
+```txt
+New       - Nowe
+Paid      - Opłacone
+Sent      - Wysłane
+Finished  - Zakończone
+Cancelled - Anulowane
+```
+
+Statusy są wyświetlane po polsku w panelu administratora oraz w widoku klienta.
+
+---
+
+## 13. Zamówienia
+
+Administrator może:
+
+```txt
+- filtrować zamówienia,
+- zmieniać status,
+- edytować pozycje zamówienia,
+- anulować zamówienie,
+- przywrócić anulowane zamówienie,
+- ukryć zamówienie,
+- przywrócić ukryte zamówienie.
+```
+
+W edycji zamówienia administrator może dodać tylko aktywny produkt z aktywnej kategorii.
+
+Klient może:
+
+```txt
+- przeglądać swoje zamówienia,
+- filtrować swoje zamówienia,
+- sprawdzać szczegóły zamówienia.
+```
 
 ---
 
@@ -480,5 +494,7 @@ http://127.0.0.1:8000
 - ukrycie kategorii i sprawdzenie produktów w sklepie,
 - blokowanie i odblokowanie użytkownika,
 - statusy zamówień,
-- anulowanie i przywracanie zamówień.
+- anulowanie i przywracanie zamówień,
+- koszyk po ukryciu kategorii,
+- blokada zamówienia z niedostępnym produktem.
 ```

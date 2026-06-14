@@ -57,6 +57,9 @@ class OrderService
     {
         return Product::with('category')
             ->where('IsActive', 1)
+            ->whereHas('category', function ($q) {
+                $q->where('IsActive', 1);
+            })
             ->orderBy('Name')
             ->get();
     }
@@ -133,7 +136,11 @@ class OrderService
                     ]);
                 }
 
-                $product = Product::where('IsActive', 1)
+                $product = Product::with('category')
+                    ->where('IsActive', 1)
+                    ->whereHas('category', function ($q) {
+                        $q->where('IsActive', 1);
+                    })
                     ->lockForUpdate()
                     ->find($productId);
 
@@ -276,11 +283,17 @@ class OrderService
             $productsToUpdate = [];
 
             foreach ($items as $item) {
-                $product = Product::lockForUpdate()->find($item->ProductId);
+                $product = Product::with('category')
+                    ->where('IsActive', 1)
+                    ->whereHas('category', function ($q) {
+                        $q->where('IsActive', 1);
+                    })
+                    ->lockForUpdate()
+                    ->find($item->ProductId);
 
-                if (!$product || (int) $product->IsActive !== 1) {
+                if (!$product) {
                     throw ValidationException::withMessages([
-                        'product' => 'Jeden z produktów w zamówieniu nie jest aktywny.'
+                        'product' => 'Jeden z produktów w zamówieniu nie jest już dostępny.'
                     ]);
                 }
 
@@ -333,7 +346,11 @@ class OrderService
 
             $this->checkOrderCanBeEdited($order);
 
-            $product = Product::where('IsActive', 1)
+            $product = Product::with('category')
+                ->where('IsActive', 1)
+                ->whereHas('category', function ($q) {
+                    $q->where('IsActive', 1);
+                })
                 ->lockForUpdate()
                 ->findOrFail($request->input('ProductId'));
 
@@ -389,7 +406,11 @@ class OrderService
                 ->lockForUpdate()
                 ->findOrFail($itemId);
 
-            $product = Product::where('IsActive', 1)
+            $product = Product::with('category')
+                ->where('IsActive', 1)
+                ->whereHas('category', function ($q) {
+                    $q->where('IsActive', 1);
+                })
                 ->lockForUpdate()
                 ->findOrFail($item->ProductId);
 
