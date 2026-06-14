@@ -44,6 +44,14 @@ class OrderController extends Controller
             ->with('success', 'Status zamówienia został zaktualizowany.');
     }
 
+    public function cancel(int $id)
+    {
+        $this->orderService->cancel($id);
+
+        return redirect()->back()
+            ->with('success', 'Zamówienie zostało anulowane.');
+    }
+
     public function addItem(Request $request, int $orderId)
     {
         $this->orderService->addItem($request, $orderId);
@@ -81,6 +89,6 @@ class OrderController extends Controller
         $this->orderService->delete($id);
 
         return redirect()->route('orders.index')
-            ->with('success', 'Zamówienie zostało dezaktywowane.');
+            ->with('success', 'Zamówienie zostało ukryte.');
     }
 }

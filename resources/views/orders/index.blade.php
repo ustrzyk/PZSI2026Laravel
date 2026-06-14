@@ -7,6 +7,7 @@
             'Paid' => 'Opłacone',
             'Sent' => 'Wysłane',
             'Finished' => 'Zakończone',
+            'Cancelled' => 'Anulowane',
         ];
 
         $statusClasses = [
@@ -14,6 +15,7 @@
             'Paid' => 'bg-primary',
             'Sent' => 'bg-warning text-dark',
             'Finished' => 'bg-success',
+            'Cancelled' => 'bg-danger',
         ];
     @endphp
 
@@ -64,6 +66,10 @@
                             <option value="Finished" @if($status == 'Finished') selected @endif>
                                 Zakończone
                             </option>
+
+                            <option value="Cancelled" @if($status == 'Cancelled') selected @endif>
+                                Anulowane
+                            </option>
                         </select>
                     </div>
 
@@ -103,14 +109,27 @@
                             Edytuj
                         </a>
 
+                        @if($order->Status != 'Cancelled')
+                            <form method="POST"
+                                  action="{{ route('orders.cancel', $order->Id) }}"
+                                  class="me-2"
+                                  onsubmit="return confirm('Anulować zamówienie?');">
+                                @csrf
+
+                                <button class="btn btn-outline-danger btn-sm" type="submit">
+                                    Anuluj
+                                </button>
+                            </form>
+                        @endif
+
                         <form method="POST"
                               action="{{ route('orders.delete', $order->Id) }}"
-                              onsubmit="return confirm('Czy na pewno dezaktywować to zamówienie?');">
+                              onsubmit="return confirm('Ukryć zamówienie?');">
                             @csrf
                             @method('DELETE')
 
                             <button class="btn btn-danger btn-sm" type="submit">
-                                Dezaktywuj
+                                Ukryj
                             </button>
                         </form>
                     </div>

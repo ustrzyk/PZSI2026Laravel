@@ -196,9 +196,44 @@ class OrderService
         ]);
 
         $model = Order::where('IsActive', 1)->findOrFail($id);
+
+        $this->checkOrderCanBeEdited($model);
+
         $model->Status = $request->input('Status');
         $model->EditDateTime = now();
         $model->save();
+    }
+
+    public function cancel(int $id): void
+    {
+        DB::transaction(function () use ($id) {
+            $order = Order::where('IsActive', 1)
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            if ($order->Status == 'Cancelled') {
+                return;
+            }
+
+            $items = OrderItem::where('OrderId', $order->Id)
+                ->where('IsActive', 1)
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($items as $item) {
+                $product = Product::lockForUpdate()->find($item->ProductId);
+
+                if ($product) {
+                    $product->Stock = $product->Stock + $item->Quantity;
+                    $product->EditDateTime = now();
+                    $product->save();
+                }
+            }
+
+            $order->Status = 'Cancelled';
+            $order->EditDateTime = now();
+            $order->save();
+        });
     }
 
     public function addItem(Request $request, int $orderId): void
@@ -212,6 +247,8 @@ class OrderService
             $order = Order::where('IsActive', 1)
                 ->lockForUpdate()
                 ->findOrFail($orderId);
+
+            $this->checkOrderCanBeEdited($order);
 
             $product = Product::where('IsActive', 1)
                 ->lockForUpdate()
@@ -262,6 +299,8 @@ class OrderService
                 ->lockForUpdate()
                 ->findOrFail($orderId);
 
+            $this->checkOrderCanBeEdited($order);
+
             $item = OrderItem::where('OrderId', $order->Id)
                 ->where('IsActive', 1)
                 ->lockForUpdate()
@@ -295,6 +334,8 @@ class OrderService
             $order = Order::where('IsActive', 1)
                 ->lockForUpdate()
                 ->findOrFail($orderId);
+
+            $this->checkOrderCanBeEdited($order);
 
             $item = OrderItem::where('OrderId', $order->Id)
                 ->where('IsActive', 1)
@@ -332,6 +373,8 @@ class OrderService
             $order = Order::where('IsActive', 1)
                 ->lockForUpdate()
                 ->findOrFail($orderId);
+
+            $this->checkOrderCanBeEdited($order);
 
             $item = OrderItem::where('OrderId', $order->Id)
                 ->where('IsActive', 1)
@@ -373,5 +416,14 @@ class OrderService
         $order->TotalPrice = $total;
         $order->EditDateTime = now();
         $order->save();
+    }
+
+    private function checkOrderCanBeEdited(Order $order): void
+    {
+        if ($order->Status == 'Cancelled') {
+            throw ValidationException::withMessages([
+                'order' => 'Nie można edytować anulowanego zamówienia.'
+            ]);
+        }
     }
 }

@@ -246,8 +246,19 @@ Lista zamówień ma:
 - filtr statusu,
 - statusy po polsku,
 - podgląd pozycji,
-- przejście do edycji zamówienia,
-- dezaktywację zamówienia.
+- przejście do edycji,
+- anulowanie,
+- ukrywanie.
+```
+
+Statusy zamówienia:
+
+```txt
+New       - Nowe
+Paid      - Opłacone
+Sent      - Wysłane
+Finished  - Zakończone
+Cancelled - Anulowane
 ```
 
 Edycja zamówienia jest dostępna pod adresem:
@@ -263,7 +274,14 @@ W edycji zamówienia administrator może:
 - dodać produkt,
 - zwiększyć ilość pozycji,
 - zmniejszyć ilość pozycji,
-- usunąć pozycję.
+- usunąć pozycję,
+- anulować zamówienie.
+```
+
+Akcja `Ukryj` ustawia:
+
+```txt
+IsActive = 0
 ```
 
 ---
@@ -309,7 +327,7 @@ Stock
 
 Pole `Stock` oznacza stan magazynowy produktu.
 
-Aplikacja sprawdza stan magazynowy w koszyku, podczas składania zamówienia oraz podczas edycji zamówienia przez administratora.
+Aplikacja sprawdza stan magazynowy w koszyku, przy zamówieniach i przy edycji zamówienia.
 
 Jeżeli produkt ma:
 
@@ -322,8 +340,6 @@ to klient widzi komunikat:
 ```txt
 Brak w magazynie
 ```
-
-i nie może dodać produktu do koszyka.
 
 ---
 
@@ -378,8 +394,6 @@ IsPromoted = 1 - produkt promowany
 IsPromoted = 0 - produkt zwykły
 ```
 
-Dzięki temu strona główna nie pokazuje wszystkich produktów, tylko wybrane produkty promowane.
-
 ---
 
 ## 14. Górne menu
@@ -406,15 +420,23 @@ Dla administratora linki panelu administracyjnego są umieszczone w rozwijanym m
 
 ## 15. Usuwanie rekordów
 
-W projekcie nie usuwam rekordów fizycznie z bazy.
+W projekcie rekordy są ukrywane przez pole:
 
-Zamiast tego ustawiane jest:
+```txt
+IsActive
+```
+
+Aktywny rekord ma:
+
+```txt
+IsActive = 1
+```
+
+Ukryty rekord ma:
 
 ```txt
 IsActive = 0
 ```
-
-Dzięki temu rekord zostaje w bazie danych, ale nie jest wyświetlany w aplikacji.
 
 ---
 
@@ -484,8 +506,9 @@ Warto sprawdzić:
 - czy działa rozwijane menu administratora,
 - czy działa filtr statusu zamówień,
 - czy działa edycja zamówienia z pozycjami,
+- czy działa status Anulowane,
+- czy działa ukrywanie zamówień,
 - czy działa koszyk,
-- czy nie można kupić produktu bez stanu magazynowego,
 - czy klient widzi tylko swoje zamówienia,
 - czy klient nie ma dostępu do panelu admina,
 - czy admin ma dostęp do panelu admina,
