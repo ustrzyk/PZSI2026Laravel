@@ -20,12 +20,17 @@ class OrderService
 
         if ($request->query('search')) {
             $search = $request->query('search');
+            $statusFromSearch = $this->getStatusFromSearch($search);
 
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search, $statusFromSearch) {
                 $q->where('CustomerName', 'like', '%' . $search . '%')
                     ->orWhere('CustomerEmail', 'like', '%' . $search . '%')
                     ->orWhere('Address', 'like', '%' . $search . '%')
                     ->orWhere('Status', 'like', '%' . $search . '%');
+
+                if ($statusFromSearch) {
+                    $q->orWhere('Status', $statusFromSearch);
+                }
 
                 if (is_numeric($search)) {
                     $q->orWhere('Id', $search);
@@ -63,17 +68,26 @@ class OrderService
 
         if ($request->query('search')) {
             $search = $request->query('search');
+            $statusFromSearch = $this->getStatusFromSearch($search);
 
-            $query->where(function ($q) use ($search) {
+            $query->where(function ($q) use ($search, $statusFromSearch) {
                 $q->where('CustomerName', 'like', '%' . $search . '%')
                     ->orWhere('CustomerEmail', 'like', '%' . $search . '%')
                     ->orWhere('Address', 'like', '%' . $search . '%')
                     ->orWhere('Status', 'like', '%' . $search . '%');
 
+                if ($statusFromSearch) {
+                    $q->orWhere('Status', $statusFromSearch);
+                }
+
                 if (is_numeric($search)) {
                     $q->orWhere('Id', $search);
                 }
             });
+        }
+
+        if ($request->query('status')) {
+            $query->where('Status', $request->query('status'));
         }
 
         return $query->orderBy('CreationDateTime', 'desc')
@@ -83,7 +97,7 @@ class OrderService
 
     public function getForCurrentUserById(int $id): Order
     {
-        return Order::with(['items.product'])
+        return Order::with(['items.product.category'])
             ->where('IsActive', 1)
             ->where('UserId', session('user_id'))
             ->findOrFail($id);
@@ -425,5 +439,19 @@ class OrderService
                 'order' => 'Nie można edytować anulowanego zamówienia.'
             ]);
         }
+    }
+
+    private function getStatusFromSearch(string $search): ?string
+    {
+        $value = mb_strtolower(trim($search));
+
+        return match ($value) {
+            'nowe', 'new' => 'New',
+            'opłacone', 'oplacone', 'paid' => 'Paid',
+            'wysłane', 'wyslane', 'sent' => 'Sent',
+            'zakończone', 'zakonczone', 'finished' => 'Finished',
+            'anulowane', 'anulowany', 'cancelled', 'canceled' => 'Cancelled',
+            default => null,
+        };
     }
 }

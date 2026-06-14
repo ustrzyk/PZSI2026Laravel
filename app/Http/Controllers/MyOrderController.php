@@ -16,18 +16,17 @@ class MyOrderController extends Controller
 
     public function index(Request $request)
     {
-        // klient widzi tylko swoje zamówienia
         $orders = $this->orderService->getForCurrentUser($request);
 
         return view('myOrders.index', [
             'orders' => $orders,
-            'search' => $request->query('search')
+            'search' => $request->query('search'),
+            'status' => $request->query('status')
         ]);
     }
 
     public function show(int $id)
     {
-        // klient może podejrzeć tylko swoje zamówienie
         $order = $this->orderService->getForCurrentUserById($id);
 
         return view('myOrders.show', [

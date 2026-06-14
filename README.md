@@ -191,7 +191,8 @@ Strona klienta zawiera:
 - szczegóły produktu,
 - wyszukiwarkę produktów,
 - koszyk,
-- historię zamówień klienta.
+- historię zamówień klienta,
+- szczegóły zamówienia klienta.
 ```
 
 Główne adresy klienta:
@@ -237,19 +238,7 @@ W górnym menu panel administratora jest pokazany jako rozwijana lista.
 
 ---
 
-## 9. Zamówienia w panelu administratora
-
-Lista zamówień ma:
-
-```txt
-- wyszukiwarkę,
-- filtr statusu,
-- statusy po polsku,
-- podgląd pozycji,
-- przejście do edycji,
-- anulowanie,
-- ukrywanie.
-```
+## 9. Statusy zamówień
 
 Statusy zamówienia:
 
@@ -260,6 +249,32 @@ Sent      - Wysłane
 Finished  - Zakończone
 Cancelled - Anulowane
 ```
+
+Statusy są wyświetlane po polsku w panelu administratora oraz w widoku klienta.
+
+Lista zamówień administratora ma:
+
+```txt
+- wyszukiwarkę,
+- filtr statusu,
+- podgląd pozycji,
+- przejście do edycji,
+- anulowanie,
+- ukrywanie.
+```
+
+Lista zamówień klienta ma:
+
+```txt
+- wyszukiwarkę,
+- filtr statusu,
+- statusy po polsku,
+- przejście do szczegółów zamówienia.
+```
+
+---
+
+## 10. Edycja zamówienia
 
 Edycja zamówienia jest dostępna pod adresem:
 
@@ -286,7 +301,7 @@ IsActive = 0
 
 ---
 
-## 10. Koszyk i zamówienia klienta
+## 11. Koszyk
 
 Koszyk jest przechowywany w sesji.
 
@@ -297,27 +312,14 @@ Klient może:
 - zwiększyć ilość produktu,
 - zmniejszyć ilość produktu,
 - usunąć produkt z koszyka,
-- złożyć zamówienie,
-- sprawdzić swoje zamówienia.
-```
-
-Po złożeniu zamówienia aplikacja tworzy rekord w tabeli:
-
-```txt
-Orders
-```
-
-oraz pozycje zamówienia w tabeli:
-
-```txt
-OrderItems
+- złożyć zamówienie.
 ```
 
 W górnym menu obok koszyka wyświetla się licznik produktów znajdujących się w koszyku.
 
 ---
 
-## 11. Obsługa magazynu
+## 12. Obsługa magazynu
 
 Produkty mają pole:
 
@@ -325,9 +327,7 @@ Produkty mają pole:
 Stock
 ```
 
-Pole `Stock` oznacza stan magazynowy produktu.
-
-Aplikacja sprawdza stan magazynowy w koszyku, przy zamówieniach i przy edycji zamówienia.
+Aplikacja kontroluje stan magazynowy w koszyku, przy składaniu zamówienia i przy edycji zamówienia.
 
 Jeżeli produkt ma:
 
@@ -343,7 +343,7 @@ Brak w magazynie
 
 ---
 
-## 12. Szczegóły produktu
+## 13. Szczegóły produktu
 
 Aplikacja ma osobną stronę szczegółów produktu:
 
@@ -363,23 +363,22 @@ Na liście produktów pokazane są najważniejsze informacje:
 - przycisk dodania do koszyka.
 ```
 
-Na stronie szczegółów produktu pokazane są pełniejsze dane:
+Na stronie szczegółów produktu pokazane są:
 
 ```txt
 - nazwa produktu,
-- pełny opis,
+- opis,
 - cena,
 - stan magazynowy,
 - kategoria,
 - obrazek,
 - informacja czy produkt jest promowany,
-- pasujące akcesoria,
-- przycisk dodania do koszyka.
+- pasujące akcesoria.
 ```
 
 ---
 
-## 13. Produkty promowane
+## 14. Produkty promowane
 
 Produkty mają pole:
 
@@ -396,7 +395,7 @@ IsPromoted = 0 - produkt zwykły
 
 ---
 
-## 14. Górne menu
+## 15. Górne menu
 
 Górne menu zawiera ikonki oraz tekst.
 
@@ -418,7 +417,7 @@ Dla administratora linki panelu administracyjnego są umieszczone w rozwijanym m
 
 ---
 
-## 15. Usuwanie rekordów
+## 16. Usuwanie rekordów
 
 W projekcie rekordy są ukrywane przez pole:
 
@@ -440,7 +439,7 @@ IsActive = 0
 
 ---
 
-## 16. Struktura katalogów
+## 17. Struktura katalogów
 
 Najważniejsze katalogi:
 
@@ -456,7 +455,7 @@ database                - skrypt SQL bazy danych
 
 ---
 
-## 17. Uruchomienie projektu
+## 18. Uruchomienie projektu
 
 Wejście do katalogu projektu:
 
@@ -492,7 +491,7 @@ http://127.0.0.1:8000
 
 ---
 
-## 18. Testowe sprawdzenie aplikacji
+## 19. Testowe sprawdzenie aplikacji
 
 Warto sprawdzić:
 
@@ -504,11 +503,11 @@ Warto sprawdzić:
 - czy działa licznik koszyka w menu,
 - czy działają przyciski plus i minus w koszyku,
 - czy działa rozwijane menu administratora,
-- czy działa filtr statusu zamówień,
+- czy działa filtr statusu zamówień u administratora,
+- czy działa filtr statusu w Moich zamówieniach,
+- czy status Anulowane wyświetla się po polsku,
 - czy działa edycja zamówienia z pozycjami,
-- czy działa status Anulowane,
 - czy działa ukrywanie zamówień,
-- czy działa koszyk,
 - czy klient widzi tylko swoje zamówienia,
 - czy klient nie ma dostępu do panelu admina,
 - czy admin ma dostęp do panelu admina,
