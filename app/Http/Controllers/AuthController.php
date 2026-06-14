@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 class AuthController extends Controller
 {
@@ -24,7 +25,7 @@ class AuthController extends Controller
         $isLogged = $this->authService->login($request);
 
         if ($isLogged) {
-            return redirect()->route('shop.index')
+            return $this->redirectAfterLogin()
                 ->with('success', 'Zalogowano poprawnie.');
         }
 
@@ -52,5 +53,14 @@ class AuthController extends Controller
 
         return redirect()->route('shop.index')
             ->with('success', 'Wylogowano poprawnie.');
+    }
+
+    private function redirectAfterLogin()
+    {
+        if (session('user_role') === 'admin' && Route::has('dashboard.index')) {
+            return redirect()->route('dashboard.index');
+        }
+
+        return redirect()->route('shop.index');
     }
 }

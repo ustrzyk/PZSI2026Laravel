@@ -9,8 +9,6 @@ Projekt został wykonany w frameworku **Laravel** z wykorzystaniem architektury 
 
 ## 1. Technologie
 
-W projekcie wykorzystano:
-
 ```txt
 PHP
 Laravel
@@ -32,13 +30,13 @@ Nazwa bazy danych:
 pzsi-druk-3d
 ```
 
-Skrypt SQL znajduje się w pliku:
+Skrypt SQL:
 
 ```txt
 database/pzsi-druk-3d.sql
 ```
 
-W bazie znajdują się tabele:
+Tabele:
 
 ```txt
 Users
@@ -50,7 +48,7 @@ Orders
 OrderItems
 ```
 
-Projekt zawiera relacje:
+Relacje:
 
 ```txt
 Categories -> Products
@@ -70,7 +68,7 @@ ProductAccessories
 
 ## 3. Konfiguracja bazy danych
 
-Przykładowa konfiguracja w pliku `.env`:
+Przykładowa konfiguracja `.env`:
 
 ```env
 DB_CONNECTION=mysql
@@ -81,7 +79,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Po zmianie konfiguracji można wyczyścić cache:
+Wyczyszczenie cache konfiguracji:
 
 ```bash
 php artisan config:clear
@@ -89,54 +87,62 @@ php artisan config:clear
 
 ---
 
-## 4. Najważniejsze funkcje aplikacji
-
-Użytkownik może:
+## 4. Funkcje użytkownika
 
 ```txt
-- przeglądać sklep,
-- wybierać kategorie produktów,
-- przeglądać produkty promowane,
-- wyszukiwać produkty,
-- sprawdzać szczegóły produktu,
-- dodawać produkty do koszyka,
-- zwiększać i zmniejszać ilość produktów w koszyku,
-- usuwać produkty z koszyka,
-- składać zamówienia,
-- przeglądać swoje zamówienia,
-- sprawdzać szczegóły swoich zamówień,
-- rejestrować się,
-- logować się,
-- wylogować się.
-```
-
-Administrator może zarządzać:
-
-```txt
-- produktami,
-- kategoriami,
-- akcesoriami,
-- użytkownikami,
-- zamówieniami,
-- pozycjami zamówień.
+- przeglądanie sklepu,
+- wybór kategorii,
+- produkty promowane,
+- wyszukiwarka produktów,
+- szczegóły produktu,
+- koszyk,
+- zmiana ilości produktów w koszyku,
+- składanie zamówień,
+- historia zamówień,
+- szczegóły zamówienia,
+- rejestracja,
+- logowanie,
+- wylogowanie.
 ```
 
 ---
 
-## 5. Role użytkowników
+## 5. Funkcje administratora
 
-W projekcie są dwie role:
+```txt
+- panel startowy,
+- zarządzanie produktami,
+- zarządzanie kategoriami,
+- zarządzanie akcesoriami,
+- zarządzanie użytkownikami,
+- zarządzanie zamówieniami,
+- edycja pozycji z poziomu zamówienia.
+```
+
+Panel startowy administratora:
+
+```txt
+/admin
+```
+
+Techniczna ścieżka CRUD dla pozycji zamówień:
+
+```txt
+/order-items
+```
+
+---
+
+## 6. Role użytkowników
+
+Role:
 
 ```txt
 admin
 client
 ```
 
-Rola `admin` ma dostęp do panelu administracyjnego.
-
-Rola `client` to zwykły klient sklepu.
-
-Nowy użytkownik utworzony przez rejestrację dostaje automatycznie rolę:
+Nowy użytkownik utworzony przez rejestrację dostaje rolę:
 
 ```txt
 client
@@ -150,23 +156,18 @@ admin
 
 ---
 
-## 6. Logowanie i bezpieczeństwo
+## 7. Logowanie
 
-Hasła użytkowników są zapisywane w bazie jako hash.
+Hasła są zapisywane jako hash.
 
-Do hashowania haseł używany jest mechanizm Laravel:
+Mechanizmy Laravel:
 
 ```php
 Hash::make()
-```
-
-Podczas logowania hasło jest sprawdzane przez:
-
-```php
 Hash::check()
 ```
 
-Po zalogowaniu dane użytkownika są zapisane w sesji:
+Po zalogowaniu w sesji zapisywane są:
 
 ```txt
 user_id
@@ -174,28 +175,20 @@ user_name
 user_role
 ```
 
-Panel administracyjny jest zabezpieczony middleware i dostępny tylko dla użytkownika z rolą `admin`.
+Po zalogowaniu:
+
+```txt
+admin  -> panel administratora
+client -> strona główna sklepu
+```
+
+Wylogowanie przekierowuje na stronę główną sklepu.
 
 ---
 
-## 7. Widoki klienta
+## 8. Widoki klienta
 
-Strona klienta zawiera:
-
-```txt
-- stronę główną sklepu,
-- kafelki kategorii,
-- produkty promowane,
-- karuzelę produktów promowanych,
-- stronę wybranej kategorii,
-- szczegóły produktu,
-- wyszukiwarkę produktów,
-- koszyk,
-- historię zamówień klienta,
-- szczegóły zamówienia klienta.
-```
-
-Główne adresy klienta:
+Adresy:
 
 ```txt
 /
@@ -208,57 +201,30 @@ my-orders/{id}
 
 ---
 
-## 8. Panel administratora
+## 9. Panel administratora
 
-Panel administratora zawiera:
-
-```txt
-- panel startowy,
-- produkty,
-- kategorie,
-- akcesoria,
-- użytkowników,
-- zamówienia,
-- pozycje zamówień.
-```
-
-Adres panelu startowego:
+Adresy widoczne w menu administratora:
 
 ```txt
 /admin
-```
-
-Pozostałe adresy panelu administracyjnego:
-
-```txt
 /products
 /categories
 /accessories
 /users
 /orders
+```
+
+Dodatkowa ścieżka techniczna:
+
+```txt
 /order-items
 ```
 
-W panelu startowym znajdują się:
-
-```txt
-- liczba produktów,
-- liczba kategorii,
-- liczba akcesoriów,
-- liczba użytkowników,
-- liczba zamówień,
-- wartość zamówień,
-- ostatnie zamówienia,
-- produkty z niskim stanem.
-```
-
-W górnym menu panel administratora jest pokazany jako rozwijana lista.
+Panel administracyjny jest zabezpieczony middleware i dostępny tylko dla roli `admin`.
 
 ---
 
-## 9. Statusy zamówień
-
-Statusy zamówienia:
+## 10. Statusy zamówień
 
 ```txt
 New       - Nowe
@@ -270,77 +236,50 @@ Cancelled - Anulowane
 
 Statusy są wyświetlane po polsku w panelu administratora oraz w widoku klienta.
 
-Lista zamówień administratora ma:
-
-```txt
-- wyszukiwarkę,
-- filtr statusu,
-- statusy po polsku,
-- podgląd pozycji,
-- przejście do edycji,
-- anulowanie,
-- przywracanie,
-- ukrywanie.
-```
-
-Lista zamówień klienta ma:
-
-```txt
-- wyszukiwarkę,
-- filtr statusu,
-- statusy po polsku,
-- przejście do szczegółów zamówienia.
-```
-
 ---
 
-## 10. Edycja zamówienia
+## 11. Zamówienia
 
-Edycja zamówienia jest dostępna pod adresem:
-
-```txt
-/orders/edit/{id}
-```
-
-W edycji zamówienia administrator może:
+Administrator może:
 
 ```txt
-- zmienić status,
-- dodać produkt,
-- zwiększyć ilość pozycji,
-- zmniejszyć ilość pozycji,
-- usunąć pozycję,
+- filtrować zamówienia,
+- zmieniać status,
+- edytować pozycje zamówienia,
 - anulować zamówienie,
-- przywrócić anulowane zamówienie.
+- przywrócić anulowane zamówienie,
+- ukryć zamówienie.
 ```
 
-Akcja `Ukryj` ustawia:
+Klient może:
 
 ```txt
-IsActive = 0
+- przeglądać swoje zamówienia,
+- filtrować swoje zamówienia,
+- sprawdzać szczegóły zamówienia.
 ```
 
 ---
 
-## 11. Koszyk
+## 12. Koszyk
 
 Koszyk jest przechowywany w sesji.
 
 Klient może:
 
 ```txt
-- dodać produkt do koszyka,
-- zwiększyć ilość produktu,
-- zmniejszyć ilość produktu,
-- usunąć produkt z koszyka,
+- dodać produkt,
+- zwiększyć ilość,
+- zmniejszyć ilość,
+- usunąć produkt,
 - złożyć zamówienie.
 ```
 
-W górnym menu obok koszyka wyświetla się licznik produktów znajdujących się w koszyku.
+W górnym menu widoczny jest licznik produktów w koszyku.
 
 ---
 
-## 12. Obsługa magazynu
+## 13. Magazyn
 
 Produkty mają pole:
 
@@ -348,58 +287,34 @@ Produkty mają pole:
 Stock
 ```
 
-Aplikacja kontroluje stan magazynowy w koszyku, przy składaniu zamówienia i przy edycji zamówienia.
-
-Jeżeli produkt ma:
-
-```txt
-Stock = 0
-```
-
-to klient widzi komunikat:
-
-```txt
-Brak w magazynie
-```
+Produkt bez stanu magazynowego nie może zostać dodany do koszyka.
 
 ---
 
-## 13. Szczegóły produktu
+## 14. Szczegóły produktu
 
-Aplikacja ma osobną stronę szczegółów produktu:
+Adres:
 
 ```txt
 /product/{id}
 ```
 
-Na liście produktów pokazane są najważniejsze informacje:
+Na stronie szczegółów produktu widoczne są:
 
 ```txt
 - nazwa,
-- krótki opis,
-- kategoria,
-- cena,
-- stan magazynowy,
-- przycisk szczegółów,
-- przycisk dodania do koszyka.
-```
-
-Na stronie szczegółów produktu pokazane są:
-
-```txt
-- nazwa produktu,
 - opis,
 - cena,
 - stan magazynowy,
 - kategoria,
 - obrazek,
-- informacja czy produkt jest promowany,
+- informacja o promowaniu,
 - pasujące akcesoria.
 ```
 
 ---
 
-## 14. Produkty promowane
+## 15. Produkty promowane
 
 Produkty mają pole:
 
@@ -407,7 +322,7 @@ Produkty mają pole:
 IsPromoted
 ```
 
-Pole oznacza, czy produkt ma być wyświetlany na stronie głównej jako promowany.
+Wartości:
 
 ```txt
 IsPromoted = 1 - produkt promowany
@@ -416,11 +331,11 @@ IsPromoted = 0 - produkt zwykły
 
 ---
 
-## 15. Górne menu
+## 16. Górne menu
 
-Górne menu zawiera ikonki oraz tekst.
+Menu zawiera ikonki oraz tekst.
 
-Przykładowe elementy menu:
+Przykładowe elementy:
 
 ```txt
 🏠 Start
@@ -432,79 +347,53 @@ Przykładowe elementy menu:
 🚪 Wyloguj
 ```
 
-Menu pokazuje aktywną stronę przez podświetlenie linku.
-
-Dla administratora linki panelu administracyjnego są umieszczone w rozwijanym menu.
+Dla administratora linki panelu są w rozwijanym menu.
 
 ---
 
-## 16. Usuwanie rekordów
+## 17. Ukrywanie rekordów
 
-W projekcie rekordy są ukrywane przez pole:
+Rekordy są ukrywane przez pole:
 
 ```txt
 IsActive
 ```
 
-Aktywny rekord ma:
+Wartości:
 
 ```txt
 IsActive = 1
-```
-
-Ukryty rekord ma:
-
-```txt
 IsActive = 0
 ```
 
 ---
 
-## 17. Struktura katalogów
-
-Najważniejsze katalogi:
+## 18. Struktura katalogów
 
 ```txt
 app/Models              - modele
 app/Http/Controllers    - kontrolery
 app/Http/Middleware     - middleware
-app/Services            - serwisy z logiką aplikacji
+app/Services            - serwisy
 resources/views         - widoki Blade
-routes/web.php          - trasy aplikacji
-database                - skrypt SQL bazy danych
+routes/web.php          - trasy
+database                - skrypt SQL
 ```
 
 ---
 
-## 18. Uruchomienie projektu
-
-Wejście do katalogu projektu:
+## 19. Uruchomienie projektu
 
 ```bash
 cd /c/git/PZSI2026Laravel
-```
-
-Odświeżenie autoload:
-
-```bash
 composer dump-autoload
-```
-
-Wyczyszczenie cache:
-
-```bash
 php artisan config:clear
 php artisan route:clear
 php artisan view:clear
-```
-
-Uruchomienie projektu:
-
-```bash
 php artisan serve
 ```
 
-Adres aplikacji:
+Adres:
 
 ```txt
 http://127.0.0.1:8000
@@ -512,28 +401,20 @@ http://127.0.0.1:8000
 
 ---
 
-## 19. Testowe sprawdzenie aplikacji
-
-Warto sprawdzić:
+## 20. Test
 
 ```txt
-- czy działa strona główna,
-- czy działają kategorie,
-- czy działa strona szczegółów produktu,
-- czy działają produkty promowane,
-- czy działa licznik koszyka w menu,
-- czy działają przyciski plus i minus w koszyku,
-- czy działa rozwijane menu administratora,
-- czy działa panel startowy administratora,
-- czy działa filtr statusu zamówień u administratora,
-- czy działa filtr statusu w Moich zamówieniach,
-- czy status Anulowane wyświetla się po polsku,
-- czy działa edycja zamówienia z pozycjami,
-- czy działa anulowanie zamówienia,
-- czy działa przywracanie zamówienia,
-- czy działa ukrywanie zamówień,
-- czy klient widzi tylko swoje zamówienia,
-- czy klient nie ma dostępu do panelu admina,
-- czy admin ma dostęp do panelu admina,
-- czy działają operacje CRUD.
+- strona główna,
+- kategorie,
+- szczegóły produktu,
+- koszyk,
+- licznik koszyka,
+- logowanie klienta,
+- logowanie administratora,
+- przekierowanie administratora do panelu,
+- Moje zamówienia,
+- panel administratora,
+- CRUD,
+- statusy zamówień,
+- anulowanie i przywracanie zamówień.
 ```

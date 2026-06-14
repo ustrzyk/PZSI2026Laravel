@@ -5,7 +5,6 @@
     <title>Sklep 3D TSaran</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    {{-- Bootstrap daje mi szybki wygląd strony --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -115,13 +114,6 @@
                                 <a class="dropdown-item {{ request()->routeIs('users.*') ? 'active' : '' }}"
                                    href="{{ route('users.index') }}">
                                     👤 Użytkownicy
-                                </a>
-                            </li>
-
-                            <li>
-                                <a class="dropdown-item {{ request()->routeIs('order-items.*') ? 'active' : '' }}"
-                                   href="{{ route('order-items.index') }}">
-                                    📋 Pozycje zamówień
                                 </a>
                             </li>
                         </ul>
