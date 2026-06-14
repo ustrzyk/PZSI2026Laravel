@@ -17,19 +17,19 @@
         @if($hasStockError)
             <div class="alert alert-warning">
                 W koszyku znajduje się produkt, którego ilość jest większa niż aktualny stan magazynowy.
-                Usuń produkt z koszyka albo zmniejsz ilość przez ponowne dodanie po odświeżeniu stanu.
+                Zmniejsz ilość przyciskiem minus albo usuń produkt z koszyka.
             </div>
         @endif
 
-        <table class="table table-bordered table-striped">
+        <table class="table table-bordered table-striped align-middle">
             <thead>
             <tr>
                 <th>Produkt</th>
                 <th>Cena</th>
-                <th>Ilość w koszyku</th>
+                <th>Ilość</th>
                 <th>Stan magazynowy</th>
                 <th>Razem</th>
-                <th>Akcja</th>
+                <th>Akcje</th>
             </tr>
             </thead>
 
@@ -42,13 +42,20 @@
 
                 <tr>
                     <td>
-                        {{ $product->Name }}
+                        <strong>{{ $product->Name }}</strong>
 
                         @if($quantity > $product->Stock)
                             <div class="text-danger small">
                                 W koszyku jest więcej sztuk niż w magazynie.
                             </div>
                         @endif
+
+                        <div class="mt-2">
+                            <a href="{{ route('shop.show', $product->Id) }}"
+                               class="btn btn-info btn-sm">
+                                Szczegóły
+                            </a>
+                        </div>
                     </td>
 
                     <td>
@@ -56,7 +63,39 @@
                     </td>
 
                     <td>
-                        {{ $quantity }}
+                        <div class="d-flex align-items-center">
+                            <form method="POST" action="{{ route('cart.decrease', $product->Id) }}">
+                                @csrf
+
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                    -
+                                </button>
+                            </form>
+
+                            <span class="mx-3">
+                                {{ $quantity }}
+                            </span>
+
+                            @if($quantity < $product->Stock)
+                                <form method="POST" action="{{ route('cart.increase', $product->Id) }}">
+                                    @csrf
+
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                        +
+                                    </button>
+                                </form>
+                            @else
+                                <button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+                                    +
+                                </button>
+                            @endif
+                        </div>
+
+                        @if($quantity >= $product->Stock)
+                            <div class="text-muted small mt-1">
+                                Osiągnięto maksymalny stan.
+                            </div>
+                        @endif
                     </td>
 
                     <td>

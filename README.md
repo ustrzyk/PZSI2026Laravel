@@ -100,6 +100,8 @@ Użytkownik może:
 - wyszukiwać produkty,
 - sprawdzać szczegóły produktu,
 - dodawać produkty do koszyka,
+- zwiększać i zmniejszać ilość produktów w koszyku,
+- usuwać produkty z koszyka,
 - składać zamówienia,
 - przeglądać swoje zamówienia,
 - sprawdzać szczegóły swoich zamówień,
@@ -243,6 +245,8 @@ Klient może:
 
 ```txt
 - dodać produkt do koszyka,
+- zwiększyć ilość produktu przyciskiem plus,
+- zmniejszyć ilość produktu przyciskiem minus,
 - usunąć produkt z koszyka,
 - złożyć zamówienie,
 - sprawdzić swoje zamówienia.
@@ -274,7 +278,7 @@ Stock
 
 Pole `Stock` oznacza stan magazynowy produktu.
 
-Aplikacja sprawdza stan magazynowy podczas dodawania produktu do koszyka i podczas składania zamówienia.
+Aplikacja sprawdza stan magazynowy podczas dodawania produktu do koszyka, zwiększania ilości w koszyku i podczas składania zamówienia.
 
 Jeżeli produkt ma:
 
@@ -289,6 +293,8 @@ Brak w magazynie
 ```
 
 i nie może dodać produktu do koszyka.
+
+Nie można zwiększyć ilości produktu w koszyku ponad aktualny stan magazynowy.
 
 Po złożeniu zamówienia stan magazynowy produktu jest automatycznie zmniejszany.
 
@@ -447,6 +453,8 @@ Warto sprawdzić:
 - czy działa strona szczegółów produktu,
 - czy działają produkty promowane,
 - czy działa licznik koszyka w menu,
+- czy działają przyciski plus i minus w koszyku,
+- czy nie można zwiększyć ilości ponad stan magazynowy,
 - czy działa rozwijane menu administratora,
 - czy działa koszyk,
 - czy nie można kupić produktu bez stanu magazynowego,

@@ -48,6 +48,12 @@ class CartController extends Controller
 
     public function add(int $id)
     {
+        // dodanie produktu z poziomu sklepu działa tak samo jak zwiększenie ilości
+        return $this->increase($id);
+    }
+
+    public function increase(int $id)
+    {
         // pobieram tylko aktywny produkt
         $product = Product::where('IsActive', 1)->findOrFail($id);
 
@@ -74,7 +80,35 @@ class CartController extends Controller
         session(['cart' => $cart]);
 
         return redirect()->route('cart.index')
-            ->with('success', 'Produkt został dodany do koszyka.');
+            ->with('success', 'Ilość produktu w koszyku została zwiększona.');
+    }
+
+    public function decrease(int $id)
+    {
+        $cart = session('cart', []);
+
+        if (!isset($cart[$id])) {
+            return redirect()->route('cart.index')
+                ->withErrors([
+                    'cart' => 'Tego produktu nie ma w koszyku.'
+                ]);
+        }
+
+        if ($cart[$id] > 1) {
+            $cart[$id] = $cart[$id] - 1;
+
+            session(['cart' => $cart]);
+
+            return redirect()->route('cart.index')
+                ->with('success', 'Ilość produktu w koszyku została zmniejszona.');
+        }
+
+        unset($cart[$id]);
+
+        session(['cart' => $cart]);
+
+        return redirect()->route('cart.index')
+            ->with('success', 'Produkt został usunięty z koszyka.');
     }
 
     public function remove(int $id)
