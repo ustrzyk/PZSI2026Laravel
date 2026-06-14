@@ -118,8 +118,7 @@ Administrator może zarządzać:
 - akcesoriami,
 - użytkownikami,
 - zamówieniami,
-- pozycjami zamówień,
-- pozycjami zamówienia bezpośrednio na stronie edycji zamówienia.
+- pozycjami zamówień.
 ```
 
 ---
@@ -234,56 +233,42 @@ Adresy panelu administracyjnego:
 
 Zwykły klient nie ma dostępu do tych stron.
 
-W górnym menu panel administratora jest pokazany jako rozwijana lista, żeby menu było krótsze i czytelniejsze.
+W górnym menu panel administratora jest pokazany jako rozwijana lista.
 
 ---
 
-## 9. Edycja zamówienia przez administratora
+## 9. Zamówienia w panelu administratora
 
-Administrator może wejść w edycję zamówienia:
+Lista zamówień ma:
+
+```txt
+- wyszukiwarkę,
+- filtr statusu,
+- statusy po polsku,
+- podgląd pozycji,
+- przejście do edycji zamówienia,
+- dezaktywację zamówienia.
+```
+
+Edycja zamówienia jest dostępna pod adresem:
 
 ```txt
 /orders/edit/{id}
 ```
 
-Na jednej stronie widzi:
+W edycji zamówienia administrator może:
 
 ```txt
-- dane klienta,
-- adres dostawy,
-- status zamówienia,
-- wartość zamówienia,
-- pozycje zamówienia,
-- produkty znajdujące się w zamówieniu,
-- ilości produktów,
-- ceny pozycji,
-- stan magazynowy produktów.
-```
-
-Administrator może:
-
-```txt
-- zmienić status zamówienia,
-- dodać produkt do zamówienia,
-- zwiększyć ilość produktu w zamówieniu,
-- zmniejszyć ilość produktu w zamówieniu,
-- usunąć pozycję z zamówienia.
-```
-
-Po każdej zmianie pozycji zamówienia aplikacja ponownie przelicza wartość całego zamówienia.
-
-Zmiana pozycji zamówienia wpływa też na magazyn:
-
-```txt
-- dodanie produktu zmniejsza Stock,
-- zwiększenie ilości zmniejsza Stock,
-- zmniejszenie ilości zwiększa Stock,
-- usunięcie pozycji oddaje ilość produktu do Stock.
+- zmienić status,
+- dodać produkt,
+- zwiększyć ilość pozycji,
+- zmniejszyć ilość pozycji,
+- usunąć pozycję.
 ```
 
 ---
 
-## 10. Koszyk i zamówienia
+## 10. Koszyk i zamówienia klienta
 
 Koszyk jest przechowywany w sesji.
 
@@ -291,8 +276,8 @@ Klient może:
 
 ```txt
 - dodać produkt do koszyka,
-- zwiększyć ilość produktu przyciskiem plus,
-- zmniejszyć ilość produktu przyciskiem minus,
+- zwiększyć ilość produktu,
+- zmniejszyć ilość produktu,
 - usunąć produkt z koszyka,
 - złożyć zamówienie,
 - sprawdzić swoje zamówienia.
@@ -324,7 +309,7 @@ Stock
 
 Pole `Stock` oznacza stan magazynowy produktu.
 
-Aplikacja sprawdza stan magazynowy podczas dodawania produktu do koszyka, zwiększania ilości w koszyku, składania zamówienia oraz edycji pozycji zamówienia przez administratora.
+Aplikacja sprawdza stan magazynowy w koszyku, podczas składania zamówienia oraz podczas edycji zamówienia przez administratora.
 
 Jeżeli produkt ma:
 
@@ -339,10 +324,6 @@ Brak w magazynie
 ```
 
 i nie może dodać produktu do koszyka.
-
-Nie można zwiększyć ilości produktu w koszyku ani w zamówieniu ponad aktualny stan magazynowy.
-
-Po złożeniu zamówienia stan magazynowy produktu jest automatycznie zmniejszany.
 
 ---
 
@@ -500,17 +481,13 @@ Warto sprawdzić:
 - czy działają produkty promowane,
 - czy działa licznik koszyka w menu,
 - czy działają przyciski plus i minus w koszyku,
-- czy nie można zwiększyć ilości ponad stan magazynowy,
 - czy działa rozwijane menu administratora,
+- czy działa filtr statusu zamówień,
+- czy działa edycja zamówienia z pozycjami,
 - czy działa koszyk,
 - czy nie można kupić produktu bez stanu magazynowego,
-- czy po zakupie zmniejsza się Stock,
 - czy klient widzi tylko swoje zamówienia,
 - czy klient nie ma dostępu do panelu admina,
 - czy admin ma dostęp do panelu admina,
-- czy admin może edytować zamówienie razem z pozycjami,
-- czy po dodaniu pozycji zamówienia zmniejsza się Stock,
-- czy po usunięciu pozycji zamówienia Stock wraca do magazynu,
-- czy po zmianie pozycji zamówienia przelicza się TotalPrice,
 - czy działają operacje CRUD.
 ```

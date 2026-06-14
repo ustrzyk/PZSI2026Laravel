@@ -20,7 +20,8 @@ class OrderController extends Controller
 
         return view('orders.index', [
             'orders' => $orders,
-            'search' => $request->query('search')
+            'search' => $request->query('search'),
+            'status' => $request->query('status')
         ]);
     }
 

@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -24,9 +25,16 @@ class OrderService
                 $q->where('CustomerName', 'like', '%' . $search . '%')
                     ->orWhere('CustomerEmail', 'like', '%' . $search . '%')
                     ->orWhere('Address', 'like', '%' . $search . '%')
-                    ->orWhere('Status', 'like', '%' . $search . '%')
-                    ->orWhere('Id', $search);
+                    ->orWhere('Status', 'like', '%' . $search . '%');
+
+                if (is_numeric($search)) {
+                    $q->orWhere('Id', $search);
+                }
             });
+        }
+
+        if ($request->query('status')) {
+            $query->where('Status', $request->query('status'));
         }
 
         return $query->orderBy('CreationDateTime', 'desc')->get();
@@ -35,6 +43,7 @@ class OrderService
     public function getById(int $id): Order
     {
         return Order::with(['user', 'items.product.category'])
+            ->where('IsActive', 1)
             ->findOrFail($id);
     }
 
@@ -44,6 +53,40 @@ class OrderService
             ->where('IsActive', 1)
             ->orderBy('Name')
             ->get();
+    }
+
+    public function getForCurrentUser(Request $request): LengthAwarePaginator
+    {
+        $query = Order::with(['items.product'])
+            ->where('IsActive', 1)
+            ->where('UserId', session('user_id'));
+
+        if ($request->query('search')) {
+            $search = $request->query('search');
+
+            $query->where(function ($q) use ($search) {
+                $q->where('CustomerName', 'like', '%' . $search . '%')
+                    ->orWhere('CustomerEmail', 'like', '%' . $search . '%')
+                    ->orWhere('Address', 'like', '%' . $search . '%')
+                    ->orWhere('Status', 'like', '%' . $search . '%');
+
+                if (is_numeric($search)) {
+                    $q->orWhere('Id', $search);
+                }
+            });
+        }
+
+        return $query->orderBy('CreationDateTime', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+    }
+
+    public function getForCurrentUserById(int $id): Order
+    {
+        return Order::with(['items.product'])
+            ->where('IsActive', 1)
+            ->where('UserId', session('user_id'))
+            ->findOrFail($id);
     }
 
     public function createFromCart(Request $request): void
@@ -152,7 +195,7 @@ class OrderService
             'Status' => ['required', 'string', 'max:50', 'in:New,Paid,Sent,Finished'],
         ]);
 
-        $model = Order::findOrFail($id);
+        $model = Order::where('IsActive', 1)->findOrFail($id);
         $model->Status = $request->input('Status');
         $model->EditDateTime = now();
         $model->save();
@@ -324,7 +367,8 @@ class OrderService
 
         $total = OrderItem::where('OrderId', $orderId)
             ->where('IsActive', 1)
-            ->sum(DB::raw('Price * Quantity'));
+            ->selectRaw('IFNULL(SUM(Price * Quantity), 0) as total')
+            ->value('total');
 
         $order->TotalPrice = $total;
         $order->EditDateTime = now();
