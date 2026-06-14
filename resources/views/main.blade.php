@@ -11,7 +11,6 @@
 
 <body class="d-flex flex-column min-vh-100">
 @php
-    // licznik produktów w koszyku
     $cartCount = array_sum(session('cart', []));
 @endphp
 
@@ -60,6 +59,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle
                             @if(
+                                request()->routeIs('dashboard.*') ||
                                 request()->routeIs('products.*') ||
                                 request()->routeIs('categories.*') ||
                                 request()->routeIs('accessories.*') ||
@@ -76,6 +76,13 @@
                         </a>
 
                         <ul class="dropdown-menu">
+                            <li>
+                                <a class="dropdown-item {{ request()->routeIs('dashboard.*') ? 'active' : '' }}"
+                                   href="{{ route('dashboard.index') }}">
+                                    📊 Panel
+                                </a>
+                            </li>
+
                             <li>
                                 <a class="dropdown-item {{ request()->routeIs('products.*') ? 'active' : '' }}"
                                    href="{{ route('products.index') }}">

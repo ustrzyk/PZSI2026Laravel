@@ -210,18 +210,25 @@ my-orders/{id}
 
 ## 8. Panel administratora
 
-Panel administratora zawiera operacje CRUD dla:
+Panel administratora zawiera:
 
 ```txt
-products
-categories
-accessories
-users
-orders
-order-items
+- panel startowy,
+- produkty,
+- kategorie,
+- akcesoria,
+- użytkowników,
+- zamówienia,
+- pozycje zamówień.
 ```
 
-Adresy panelu administracyjnego:
+Adres panelu startowego:
+
+```txt
+/admin
+```
+
+Pozostałe adresy panelu administracyjnego:
 
 ```txt
 /products
@@ -232,7 +239,18 @@ Adresy panelu administracyjnego:
 /order-items
 ```
 
-Zwykły klient nie ma dostępu do tych stron.
+W panelu startowym znajdują się:
+
+```txt
+- liczba produktów,
+- liczba kategorii,
+- liczba akcesoriów,
+- liczba użytkowników,
+- liczba zamówień,
+- wartość zamówień,
+- ostatnie zamówienia,
+- produkty z niskim stanem.
+```
 
 W górnym menu panel administratora jest pokazany jako rozwijana lista.
 
@@ -506,6 +524,7 @@ Warto sprawdzić:
 - czy działa licznik koszyka w menu,
 - czy działają przyciski plus i minus w koszyku,
 - czy działa rozwijane menu administratora,
+- czy działa panel startowy administratora,
 - czy działa filtr statusu zamówień u administratora,
 - czy działa filtr statusu w Moich zamówieniach,
 - czy status Anulowane wyświetla się po polsku,

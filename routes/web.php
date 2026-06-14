@@ -4,6 +4,7 @@ use App\Http\Controllers\AccessoryController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MyOrderController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\OrderItemController;
@@ -36,6 +37,8 @@ Route::middleware('user.logged')->group(function () {
 });
 
 Route::middleware('admin')->group(function () {
+    Route::get('/admin', [DashboardController::class, 'index'])->name('dashboard.index');
+
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
     Route::post('/products/create', [ProductController::class, 'store'])->name('products.store');
