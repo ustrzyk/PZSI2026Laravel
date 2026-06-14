@@ -125,6 +125,26 @@ Panel startowy administratora:
 /admin
 ```
 
+Na panelu startowym znajdują się klikalne karty:
+
+```txt
+Produkty
+Kategorie
+Akcesoria
+Użytkownicy
+Zamówienia
+Wartość zamówień
+```
+
+Panel startowy ma też szybkie akcje:
+
+```txt
+Dodaj produkt
+Dodaj kategorię
+Dodaj akcesorium
+Dodaj użytkownika
+```
+
 Techniczna ścieżka CRUD dla pozycji zamówień:
 
 ```txt
@@ -441,6 +461,9 @@ http://127.0.0.1:8000
 - logowanie klienta,
 - logowanie administratora,
 - przekierowanie administratora do panelu,
+- dashboard administratora,
+- klikalne karty dashboardu,
+- szybkie akcje dashboardu,
 - Moje zamówienia,
 - panel administratora,
 - CRUD,

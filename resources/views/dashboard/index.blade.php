@@ -29,55 +29,113 @@
 
     <div class="row mb-4">
         <div class="col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h3>{{ $statistics['productsCount'] }}</h3>
-                    <div>Produkty</div>
+            <a href="{{ route('products.index') }}" class="text-decoration-none text-dark">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="fs-3">🖨️</div>
+                        <h3>{{ $statistics['productsCount'] }}</h3>
+                        <div>Produkty</div>
+                        <small class="text-muted">Przejdź</small>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h3>{{ $statistics['categoriesCount'] }}</h3>
-                    <div>Kategorie</div>
+            <a href="{{ route('categories.index') }}" class="text-decoration-none text-dark">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="fs-3">🗂️</div>
+                        <h3>{{ $statistics['categoriesCount'] }}</h3>
+                        <div>Kategorie</div>
+                        <small class="text-muted">Przejdź</small>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h3>{{ $statistics['accessoriesCount'] }}</h3>
-                    <div>Akcesoria</div>
+            <a href="{{ route('accessories.index') }}" class="text-decoration-none text-dark">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="fs-3">🔧</div>
+                        <h3>{{ $statistics['accessoriesCount'] }}</h3>
+                        <div>Akcesoria</div>
+                        <small class="text-muted">Przejdź</small>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h3>{{ $statistics['usersCount'] }}</h3>
-                    <div>Użytkownicy</div>
+            <a href="{{ route('users.index') }}" class="text-decoration-none text-dark">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="fs-3">👤</div>
+                        <h3>{{ $statistics['usersCount'] }}</h3>
+                        <div>Użytkownicy</div>
+                        <small class="text-muted">Przejdź</small>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h3>{{ $statistics['ordersCount'] }}</h3>
-                    <div>Zamówienia</div>
+            <a href="{{ route('orders.index') }}" class="text-decoration-none text-dark">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="fs-3">🧾</div>
+                        <h3>{{ $statistics['ordersCount'] }}</h3>
+                        <div>Zamówienia</div>
+                        <small class="text-muted">Przejdź</small>
+                    </div>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="col-md-2 mb-3">
-            <div class="card text-center h-100">
-                <div class="card-body">
-                    <h5>{{ number_format($statistics['ordersTotal'], 2) }} zł</h5>
-                    <div>Wartość</div>
+            <a href="{{ route('orders.index') }}" class="text-decoration-none text-dark">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <div class="fs-3">💰</div>
+                        <h5>{{ number_format($statistics['ordersTotal'], 2) }} zł</h5>
+                        <div>Wartość</div>
+                        <small class="text-muted">Zamówienia</small>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            Szybkie akcje
+        </div>
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a href="{{ route('products.create') }}" class="btn btn-outline-primary w-100">
+                        Dodaj produkt
+                    </a>
+                </div>
+
+                <div class="col-md-3 mb-2">
+                    <a href="{{ route('categories.create') }}" class="btn btn-outline-primary w-100">
+                        Dodaj kategorię
+                    </a>
+                </div>
+
+                <div class="col-md-3 mb-2">
+                    <a href="{{ route('accessories.create') }}" class="btn btn-outline-primary w-100">
+                        Dodaj akcesorium
+                    </a>
+                </div>
+
+                <div class="col-md-3 mb-2">
+                    <a href="{{ route('users.create') }}" class="btn btn-outline-primary w-100">
+                        Dodaj użytkownika
+                    </a>
                 </div>
             </div>
         </div>
